@@ -15,7 +15,7 @@
               <!--<b-nav-text><router-link class="nav-link" to="/AddressExplorer">Address Explorer</router-link></b-nav-text>-->
               <b-nav-text><router-link class="nav-link" to="/">Home</router-link></b-nav-text>
               <b-nav-text><router-link class="nav-link" to="/BlockExplorer">Block Explorer</router-link></b-nav-text>
-              <b-nav-text><router-link class="nav-link" to="/SavedSearches">Saved Searches</router-link></b-nav-text>
+<!--              <b-nav-text><router-link class="nav-link" to="/SavedSearches">Saved Searches</router-link></b-nav-text>-->
               <b-nav-text><router-link class="nav-link" to="/Settings">Settings</router-link></b-nav-text>
             </b-navbar-nav>
           </b-collapse>
