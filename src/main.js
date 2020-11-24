@@ -7,11 +7,13 @@ import VueCookies from 'vue-cookies'
 import axios from 'axios'
 import Vuex from 'vuex'
 
+
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap-vue/dist/bootstrap-vue.css"
 
 import '@/assets/styles/styles.css'
 import '@/assets/styles/Footer-Basic.css'
+
 
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)

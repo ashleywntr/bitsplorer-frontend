@@ -12,11 +12,16 @@
     "bootstrap-vue": "^2.18.1",
     "bottleneck": "^2.19.5",
     "core-js": "^3.6.5",
+    "d3-hierarchy": "^2.0.0",
+    "d3-request": "^1.0.6",
+    "d3-scale": "^3.2.3",
+    "jquery": "^3.5.1",
     "sass": "^1.27.1",
     "sass-loader": "^10.0.4",
     "scss": "^0.2.4",
     "vue": "^2.6.11",
     "vue-cookies": "^1.7.4",
+    "vue-d3-sunburst": "^1.1.0",
     "vue-router": "^3.4.8",
     "vuex": "^3.5.1"
   },
@@ -27,7 +32,8 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "webpack": "^4.44.2"
   },
   "eslintConfig": {
     "root": true,
