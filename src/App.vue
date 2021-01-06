@@ -12,11 +12,12 @@
           <b-navbar-toggle target="nav-text-collapse"></b-navbar-toggle>
           <b-collapse id="nav-text-collapse" is-nav>
             <b-navbar-nav>
-              <!--<b-nav-text><router-link class="nav-link" to="/AddressExplorer">Address Explorer</router-link></b-nav-text>-->
               <b-nav-text><router-link class="nav-link" to="/">Home</router-link></b-nav-text>
+              <b-nav-text><router-link class="nav-link" to="/AddressExplorer">Address Explorer</router-link></b-nav-text>
               <b-nav-text><router-link class="nav-link" to="/BlockExplorer">Block Explorer</router-link></b-nav-text>
               <b-nav-text><router-link class="nav-link" to="/SavedSearches">Saved Searches</router-link></b-nav-text>
               <b-nav-text><router-link class="nav-link" to="/Settings">Settings</router-link></b-nav-text>
+              <b-nav-text><router-link class="nav-link" to="/Visualiser">Visualiser</router-link></b-nav-text>
             </b-navbar-nav>
           </b-collapse>
           <b-nav-text>{{connection_status}}</b-nav-text>
@@ -33,7 +34,9 @@
         <ul class="list-inline">
           <li class="list-inline-item"><router-link to="/">Home</router-link></li>
         </ul>
+
         <p class="copyright">py-chain 2020</p>
+        <p class="copyright">Historical Price Data Powered by <a href="https://www.coindesk.com/price/bitcoin">CoinDesk</a></p>
       </footer>
     </div>
   </div>
