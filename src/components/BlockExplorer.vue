@@ -481,8 +481,8 @@ export default {
               }
             })
             .catch(error => {
-              this.table_failed = true
-              this.failed_error_message = error
+              // this.table_failed = true
+              // this.failed_error_message = error
               this.api_busy = false
               console.log(error)
             })

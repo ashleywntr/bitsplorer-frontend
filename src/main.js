@@ -27,10 +27,12 @@ Vue.$cookies.config('7d')
 
 new Vue({
     data: {
-        api_address: 'wntrdesktop',
-        api_port: '5000',
+        api_address: '192.168.1.194',
+        api_port: '55397',
         app_state: 'Dev',
-        api_combined_address: "http://wntrdesktop:5000/api"
+        api_combined_address: "http://192.168.1.194:55397/api",
+        bitcoin_abuse_token: "wZe9GYRta5RN8s32QOKDmtmMBWkDXzi68ho5LXz4WmmBgstS3sOgRv44rnLZ",
+        coindesk_root_url: "https://api.coindesk.com/v1/bpi"
     },
     router,
     render: h => h(App),
