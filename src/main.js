@@ -11,7 +11,7 @@ import Vuex from 'vuex'
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap-vue/dist/bootstrap-vue.css"
 
-import '@/assets/styles/styles.css'
+import '@/assets/styles/override_style.css'
 import '@/assets/styles/Footer-Basic.css'
 
 
@@ -24,15 +24,16 @@ Vue.prototype.$axios = axios
 Vue.config.productionTip = false
 Vue.$cookies.config('7d')
 
+let api_address = '192.168.1.194'
+let api_port = '55397'
 
 new Vue({
     data: {
-        api_address: '192.168.1.194',
-        api_port: '55397',
         app_state: 'Dev',
-        api_combined_address: "http://192.168.1.194:55397/api",
-        bitcoin_abuse_token: "wZe9GYRta5RN8s32QOKDmtmMBWkDXzi68ho5LXz4WmmBgstS3sOgRv44rnLZ",
-        coindesk_root_url: "https://api.coindesk.com/v1/bpi"
+        api_combined_address: `http://${api_address}:${api_port}/api`,
+        coindesk_root_url: "https://api.coindesk.com/v1/bpi",
+        api_port: api_port,
+        api_address: api_address
     },
     router,
     render: h => h(App),

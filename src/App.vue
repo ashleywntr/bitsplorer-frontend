@@ -20,7 +20,6 @@
               <b-nav-text><router-link class="nav-link" to="/Visualiser">Visualiser</router-link></b-nav-text>
             </b-navbar-nav>
           </b-collapse>
-          <b-nav-text>{{connection_status}}</b-nav-text>
         </div>
       </b-navbar>
     <div>
@@ -29,13 +28,13 @@
 
     <div class="footer-basic">
       <footer>
+        <p class="text-center">{{connection_status}}</p>
         <div class="social"><img alt="bitcoin logo public domain" class="img-fluid"
                                  src="./assets/img/Bitcoin_logo.svg" style="width: 196px;"></div>
         <ul class="list-inline">
           <li class="list-inline-item"><router-link to="/">Home</router-link></li>
         </ul>
-
-        <p class="copyright">py-chain 2020</p>
+        <p class="copyright">py-chain 2021</p>
         <p class="copyright">Historical Price Data Powered by <a href="https://www.coindesk.com/price/bitcoin">CoinDesk</a></p>
       </footer>
     </div>

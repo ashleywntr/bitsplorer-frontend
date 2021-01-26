@@ -6,29 +6,19 @@
         <p>Welcome to py-chain! The Bitcoin Blockchain explorer.</p>
       </b-col>
     </b-row>
-    <b-row>
-      <b-col>
-        <h2>Current BTC Rates</h2>
-      </b-col>
-      <b-col>
-        <h3>{{retrieval_time}}</h3>
-      </b-col>
-    </b-row>
 
     <b-row>
+
+    </b-row>
+
+    <b-row v-if="disclaimer">
       <b-col>
-      <b-table-simple v-if="disclaimer" responsive stacked>
-        <b-thead>
-          <b-tr>
-            <b-th>USD Value</b-th>
-          </b-tr>
-          <b-tr>
-            <b-th>GBP Value</b-th>
-          </b-tr>
-          <b-tr>
-            <b-th>EUR Value</b-th>
-          </b-tr>
-        </b-thead>
+        <h2>Current BTC Rates</h2>
+        <h4>{{retrieval_time}}</h4>
+      </b-col>
+
+      <b-col>
+      <b-table-simple responsive stacked>
         <b-tbody>
           <b-tr>
             <b-td stacked-heading="USD Value">${{USD_Value}}</b-td>

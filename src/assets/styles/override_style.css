@@ -87,7 +87,7 @@
 }
 
 .navbar.navbar-light.navbar-expand-md {
-  background: linear-gradient(90deg, rgb(40,6,113) 0%, #500099 53%);
+  background: linear-gradient(90deg, rgb(40, 6, 113) 0%, #500099 53%);
 }
 
 .navbar-light .navbar-brand:focus, .navbar-light .navbar-brand:hover {
@@ -104,7 +104,6 @@
 }
 
 .container, .container-lg, .container-md, .container-sm, .container-xl {
-  max-width: 90%;
   background: #f7f7f7;
 }
 
@@ -139,12 +138,6 @@ label {
   font-family: 'Prompt';
 }
 
-date, input {
-  padding: 3%;
-  margin: 5%;
-  max-width: 100%;
-}
-
 .btn btn-primary Submit {
   background: rgb(204,255,0);
 }
@@ -155,8 +148,6 @@ date, input {
   background: #ff00a8;
 }
 
-.btn:not(:disabled):not(.disabled) {
-}
 
 .submit {
   background: #b70064;

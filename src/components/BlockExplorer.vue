@@ -3,84 +3,106 @@
     <b-row>
       <b-col>
         <h1><strong>Block Explorer</strong></h1>
-        <p>Choose a date range for which data should be imported. Where possible, data will be retrieved from the
-          database.<br>New data will be acquired from the Blockchain API if necessary. This may take a while.</p>
+        <b-alert class="warning" dismissible show>NOTE: Imports of non-cached data may be subject to rate-limiting
+        </b-alert>
       </b-col>
     </b-row>
 
-    <b-row><!--Date Picker Row-->
-      <b-col class="m-2" md="">
-
-        <b-row>
-          <b-col md="">
-            <b-form-datepicker id="from_date_picker_block"
-                               v-model="from_picker_date"
-                               :disabled="from_picker_date_disabled || api_busy===true"
-                               :max="from_picker_date_max_value"
-                               :min="from_picker_date_min_value"
-                               placeholder="Retrieval Range Start Date"
-                               size="lg">
-            </b-form-datepicker>
-          </b-col>
-          <b-col md="auto">
-            <b-icon-arrow-right font-scale="3"></b-icon-arrow-right>
-          </b-col>
-          <b-col md="">
-            <b-form-datepicker id="to_date_picker_block"
-                               v-model="to_picker_date"
-                               :disabled="to_picker_date_disabled || api_busy===true"
-                               :max="to_picker_date_max_value"
-                               :min="to_picker_date_min_value"
-                               placeholder="Retrieval Range End Date"
-                               size="lg">
-            </b-form-datepicker>
-          </b-col>
-        </b-row>
-
-        <b-row v-if="this.$cookies.get('previous_searches')">
-          <b-col class="mt-2">
-            <b-form-select v-model="previous_search_selection"
-                           :disabled="api_busy"
-                           :options="previous_search_selection_options">
-
-            </b-form-select>
-          </b-col>
-        </b-row>
-
-        <b-row>
-          <b-col>
-            <b-button :disabled="import_button_disabled || api_busy===true"
-                      block class="mt-2"
-                      variant="primary"
-                      @click="blockday_axios_importer">Import Data
-            </b-button>
-          </b-col>
-        </b-row>
+    <b-row>
+      <b-col class="mb-4">
+        <b-input-group prepend="Currency" size="lg">
+          <b-form-select v-model="currency_chosen_value"
+                         :disabled="api_busy"
+                         :options="currency_options"
+          >
+          </b-form-select>
+        </b-input-group>
       </b-col>
     </b-row>
 
-    <b-row v-if="table_failed" class="m-1 d-flex flex-row align-items-center">
+    <b-row><!--DAte Pickers-->
+      <b-col class="mt-2" xl="6">
+        <b-input-group prepend="From Date" size="lg">
+          <b-form-datepicker id="from_date_picker_block"
+                             v-model="from_picker_date"
+                             :disabled="from_picker_date_disabled || api_busy===true"
+                             :max="from_picker_date_max_value"
+                             :min="from_picker_date_min_value"
+                             placeholder="Select Date">
+          </b-form-datepicker>
+        </b-input-group>
+      </b-col>
+      <b-col class="mt-2" xl="">
+        <b-input-group prepend="To Date" size="lg">
+          <b-form-datepicker id="to_date_picker_block"
+                             v-model="to_picker_date"
+                             :disabled="to_picker_date_disabled || api_busy===true"
+                             :max="to_picker_date_max_value"
+                             :min="to_picker_date_min_value"
+                             placeholder="Select Date">
+          </b-form-datepicker>
+        </b-input-group>
+      </b-col>
+    </b-row>
+
+    <b-row v-if="this.$cookies.get('previous_searches')">
+      <b-col class="mt-2">
+        <b-input-group prepend="Previous Searches" size="lg">
+          <b-form-select v-model="previous_search_selection"
+                         :disabled="api_busy"
+                         :options="previous_search_selection_options">
+          </b-form-select>
+        </b-input-group>
+      </b-col>
+    </b-row>
+
+    <b-row class="mb-2">
       <b-col>
-        <h2 class="text-danger text-center">❌ {{ failed_error_message }}</h2>
+        <b-button :disabled="import_button_disabled || api_busy===true"
+                  block class="mt-2"
+                  variant="primary"
+                  @click="import_button_click">Import Data
+        </b-button>
       </b-col>
     </b-row>
+
+    <b-row v-if="api_busy && (blockday_table_import_progress > 0 || blockday_table_error_count > 0)">
+      <b-col>
+      <span>
+        <b-progress height="2rem" :max="blockday_table_import_max"  class="mb-3" show-value>
+          <b-progress-bar :value="blockday_table_import_progress" variant="info" ></b-progress-bar>
+          <b-progress-bar :value="blockday_table_error_count" variant="danger" ></b-progress-bar>
+        </b-progress>
+      </span>
+      </b-col>
+    </b-row>
+
+    <!--    <b-row v-if="table_failed" class="m-1 d-flex flex-row align-items-center">-->
+    <!--      <b-col>-->
+    <!--        <h2 class="text-danger text-center">❌ {{ failed_error_message }}</h2>-->
+    <!--      </b-col>-->
+    <!--    </b-row>-->
+
 
     <!--BlockDay Table-->
-    <b-row>
-      <b-col v-if="date_selected && !table_failed">
+    <b-row v-if="blockday_import_completed" class="pl-2 pr-2">
+      <b-col>
         <b-table :busy="blockday_table_busy"
                  :fields="blockday_table_fields"
                  :items="blockday_table"
                  :sort-by.sync="blockday_table_sort_by"
-                 class="p-2"
+                 bordered
+                 class=""
+                 hover
                  responsive
                  select-mode="single"
                  selectable
+                 sticky-header="50vh"
                  selected-variant="primary" @row-selected="on_blockday_table_row_selected">
           <template #table-busy>
             <div class="text-danger d-flex flex-column align-items-center justify-content-center">
               <b-spinner class="pt-2" style="width: 7rem; height: 7rem;"></b-spinner>
-              <span class="pt-2">{{ blockday_table_import_progress }}</span>
+              <span class="pt-2">{{ blockday_table_import_progress_string }}</span>
             </div>
           </template>
         </b-table>
@@ -88,16 +110,20 @@
     </b-row>
 
     <!--Block Table-->
-    <b-row v-if="blockday_selected && !table_failed">
+    <b-row v-if="blockday_selected && !table_failed" class="pl-2 pr-2">
       <b-col>
         <h2><strong>Blocks on {{ slice_date_string(blockday_table_selection[0]['_id']) }}</strong></h2>
       </b-col>
-    <b-col>
-      <b-button block variant="outline-secondary" :disabled="block_table_busy || api_busy"  :href="block_csv_data_link"><b-icon-download></b-icon-download> Download .CSV</b-button>
-    </b-col>
+      <b-col>
+        <b-button :disabled="block_table_busy || api_busy" :href="block_csv_data_link" block
+                  variant="outline-secondary">
+          <b-icon-download></b-icon-download>
+          Download .CSV
+        </b-button>
+      </b-col>
     </b-row>
 
-    <b-row v-if="blockday_selected && !table_failed">
+    <b-row v-if="blockday_selected && !table_failed" class="pl-4 pr-2">
       <b-col class="">
         <b-row>
           <b-table :busy="block_table_busy"
@@ -105,7 +131,9 @@
                    :items="block_table"
                    :selectable="!api_busy"
                    :sort-by.sync="block_table_sort_by"
-                   class="pl-2 pr-2"
+                   bordered
+                   class=""
+                   hover
                    responsive
                    select-mode="single"
                    selected-variant="primary"
@@ -123,13 +151,18 @@
 
     <!--Transaction Table-->
     <b-row v-if="blockday_selected && block_selected && !table_failed">
-      <b-col class="">
-        <h2><strong>Transactions for Block {{ block_Table_selection[0]['height'] }}</strong></h2>
+      <b-col>
+        <h2><strong>Transactions for Block {{ block_table_selection[0]['height'] }}</strong></h2>
       </b-col>
       <b-col>
-        <b-button block variant="outline-secondary" :disabled="transaction_table_busy || api_busy" :href="transaction_csv_data_link"><b-icon-download></b-icon-download> Download .CSV</b-button>
+        <b-button :disabled="transaction_table_busy || api_busy" :href="transaction_csv_data_link" block hover
+                  variant="outline-secondary">
+          <b-icon-download></b-icon-download>
+          Download .CSV
+        </b-button>
       </b-col>
     </b-row>
+
 
     <b-row v-if="blockday_selected && block_selected && !table_failed">
       <b-col>
@@ -137,9 +170,10 @@
                  :fields="transaction_table_fields"
                  :items="transaction_table"
                  :sort-by.sync="transaction_table_sort_by"
+                 :sort-desc="true"
+                 bordered
                  class="pl-2 pr-2"
                  responsive
-                 :sort-desc="true"
                  sticky-header="85vh">
 
           <template #table-busy>
@@ -178,7 +212,7 @@
                     </b-thead>
                     <b-tbody>
                       <b-tr v-for="input in row.item.inputs" :key="input.prev_out.addr">
-                        <b-td stacked-heading="Value" v-text="exported_sat_to_btc(input.prev_out.value)"></b-td>
+                        <b-td stacked-heading="Value" v-text="currency_formatter(input.prev_out.value)"></b-td>
                         <b-td stacked-heading="Address">{{ input.prev_out.addr }}</b-td>
                       </b-tr>
                     </b-tbody>
@@ -200,7 +234,7 @@
                     </b-thead>
                     <b-tbody>
                       <b-tr v-for="output in row.item.out" :key="output.addr">
-                        <b-td stacked-heading="Value" v-text="exported_sat_to_btc(output.value)"></b-td>
+                        <b-td stacked-heading="Value" v-text="currency_formatter(output.value)"></b-td>
                         <b-td stacked-heading="Address">{{ output.addr }}</b-td>
                         <b-td stacked-heading="Spent">{{ output.spent }}</b-td>
                         <b-td stacked-heading="Output Order">{{ output.n }}</b-td>
@@ -230,16 +264,13 @@
 import axios from "axios"
 import Bottleneck from "bottleneck"
 
-function sat_to_btc(value, to_fixed = 2) {
-  if ((value / 100000000).toFixed(to_fixed) > 0) {
-    return ((value / 100000000).toFixed(to_fixed)).toLocaleString('en-GB') + ' BTC'
-  } else {
-    return ((value / 100000000).toFixed(6)).toLocaleString('en-gb') + ' BTC'
-  }
-}
-
 const limiter = new Bottleneck({
   minTime: 20
+})
+
+const USD_formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD'
 })
 
 export default {
@@ -261,6 +292,17 @@ export default {
       previous_search_selection: null,
       previous_search_selection_options: null,
 
+      currency_chosen_value: 'XBP',
+      currency_options: [
+        {value: 'XBP', text: '₿ XBP'},
+        {value: 'USD', text: '$ USD'},
+        {value: 'GBP', text: '£ GBP', disabled: true},
+        {value: 'EUR', text: '€ EUR', disabled: true}
+      ],
+      working_currency_value: 0.0,
+      working_date: '',
+      currency_data: [],
+
       api_busy: false,
 
       from_picker_date_max_value: max_date,
@@ -279,11 +321,18 @@ export default {
       import_button_disabled: true,
 
       date_selected: false,
+
       blockday_table_busy: false,
-      blockday_table_import_progress: null,
+      blockday_table_import_progress_string: null,
+      blockday_table_import_progress: 0,
+      blockday_table_import_max: null,
+      blockday_table_error_count: 0,
+      blockday_table_completed: false,
+
       blockday_table: null,
       blockday_table_sort_by: '_id',
       blockday_table_selection: [],
+      blockday_selected_date: '',
       blockday_table_fields: [
 
         {
@@ -307,11 +356,30 @@ export default {
             return value.toFixed(2)
           }
         },
-
-        {key: "avg_val_outputs", label: "Avg. TX Value", sortable: true, formatter: value => sat_to_btc(value)},
-        {key: "total_val_fees_block", label: "Total Fees", sortable: true, formatter: value => sat_to_btc(value)},
-        {key: "total_val_inputs", label: "Total Val. Inputs", sortable: true, formatter: value => sat_to_btc(value)},
-        {key: "total_val_outputs", label: "Total Val. Outputs", sortable: true, formatter: value => sat_to_btc(value)},
+        {
+          key: "avg_val_outputs",
+          label: "Avg. TX. Value",
+          sortable: true,
+          formatter: (value, key, item) => this.currency_formatter(value, key, item)
+        },
+        {
+          key: "total_val_fees_block",
+          label: "Total Fees",
+          sortable: true,
+          formatter: (value, key, item) => this.currency_formatter(value, key, item)
+        },
+        {
+          key: "total_val_inputs",
+          label: "Total Val. Inputs",
+          sortable: true,
+          formatter: (value, key, item) => this.currency_formatter(value, key, item)
+        },
+        {
+          key: "total_val_outputs",
+          label: "Total Val. Outputs",
+          sortable: true,
+          formatter: (value, key, item) => this.currency_formatter(value, key, item)
+        },
         {
           key: "total_num_inputs", label: "Total No. Inputs", sortable: true, formatter: value => {
             return value.toLocaleString('en-GB')
@@ -329,7 +397,7 @@ export default {
       block_table_sort_by: 'height',
       block_csv_data_link: "",
       block_table_busy: true,
-      block_Table_selection: [],
+      block_table_selection: [],
       block_table_import_progress: "",
       block_table_fields: [
         {key: "height", sortable: true, stickyColumn: true, isRowHeader: true},
@@ -353,18 +421,17 @@ export default {
             return value.toFixed(2)
           }
         },
-
         {
           key: "average_val_outputs_per_transaction",
           label: "Avg. Transaction Value",
           sortable: true,
-          formatter: value => sat_to_btc(value)
+          formatter: value => this.currency_formatter(value)
         },
         {
           key: "average_fee_per_transaction",
           label: "Avg. TX. Fee",
           sortable: true,
-          formatter: value => sat_to_btc(value, 6)
+          formatter: value => this.currency_formatter(value, 6)
         },
         {
           key: "total_num_inputs_block", label: "Total No. Inputs", sortable: true, formatter: value => {
@@ -380,16 +447,19 @@ export default {
           key: "total_val_inputs_block",
           label: "Total Val. Inputs",
           sortable: true,
-          formatter: value => sat_to_btc(value)
+          formatter: value => this.currency_formatter(value)
         },
         {
           key: "total_val_outputs_block",
           label: "Total Val. Outputs",
           sortable: true,
-          formatter: value => sat_to_btc(value)
+          formatter: value => this.currency_formatter(value)
         },
         {
-          key: "total_val_fees_block", label: "Total Val. Fees", sortable: true, formatter: value => sat_to_btc(value)
+          key: "total_val_fees_block",
+          label: "Total Val. Fees",
+          sortable: true,
+          formatter: value => this.currency_formatter(value)
         }
       ],
 
@@ -411,9 +481,24 @@ export default {
         },
         {key: "vin_sz", label: "No. Inputs", sortable: true},
         {key: "vout_sz", label: "No. Outputs", sortable: true},
-        {key: "value_inputs", label: "Total Val. Inputs", sortable: true, formatter: value => sat_to_btc(value)},
-        {key: "fee", label: "Fee", sortable: true, formatter: value => sat_to_btc(value, 6)},
-        {key: "value_outputs", label: "Total Val. Outputs", sortable: true, formatter: value => sat_to_btc(value)},
+        {
+          key: "value_inputs",
+          label: "Total Val. Inputs",
+          sortable: true,
+          formatter: (value, key, item) => this.currency_formatter(value, key, item)
+        },
+        {
+          key: "fee",
+          label: "Fee",
+          sortable: true,
+          formatter: (value, key, item) => this.currency_formatter(value, key, item, 6)
+        },
+        {
+          key: "value_outputs",
+          label: "Total Val. Outputs",
+          sortable: true,
+          formatter: value => this.currency_formatter(value)
+        },
         {key: "show_details", label: ""}
       ]
     }
@@ -432,7 +517,6 @@ export default {
       this.import_button_disabled = false
     },
     previous_search_selection: function (selection) {
-      console.log(selection)
       this.from_picker_date = selection['from_date']
       this.to_picker_date = selection['to_date']
       this.to_picker_date = selection['to_date']
@@ -440,12 +524,29 @@ export default {
   },
 
   methods: {
-    blockday_axios_importer: function () {
+    makeToast: function (variant = null, title = null, body = null, auto_hide = true) {
+      this.$bvToast.toast(`${body}`, {
+        title: `${title}`,
+        variant: variant,
+        solid: true,
+        noAutoHide: !auto_hide
+      })
+    },
+
+    import_button_click: function () {
       this.history_cookies()
+      this.blockday_axios_importer()
+
+      this.previous_search_selection = null
+    },
+    blockday_axios_importer: function () {
       this.table_failed = false
       this.api_busy = true
       this.date_selected = true
       this.blockday_table_busy = true
+      this.blockday_import_completed = false
+
+      this.blockday_table_error_count = 0
 
       this.blockday_api_import = []
       this.blockday_table = []
@@ -453,7 +554,6 @@ export default {
       this.block_selected = false
 
       let blockday_base_url = `${this.$root.api_combined_address}/blockdays`
-      console.log(blockday_base_url)
 
       let promise_list = []
       let url_list = []
@@ -467,56 +567,80 @@ export default {
         url_list.push(blockday_base_url + '?date=' + working_date.toISOString().slice(0, 10))
         working_date.setDate(working_date.getDate() + 1)
       }
-      console.log(url_list)
+      console.log('BlockDay url list: ', url_list)
+      this.blockday_table_import_progress_string = `0 / ${url_list.length}`
+      this.blockday_table_import_max = url_list.length
 
       for (let x in url_list) {
         promise_list.push(limiter.schedule(() => axios.get(url_list[x]))
             .then((results) => {
               this.blockday_api_import.push(results['data'])
-              this.blockday_table_import_progress = `${this.blockday_api_import.length} / ${promise_list.length}`
-              if (url_list.length === this.blockday_api_import.length) {
+              this.blockday_table_import_progress = this.blockday_api_import.length
+              this.blockday_table_import_progress_string = `${this.blockday_table_import_progress} / ${this.blockday_table_import_max}`
+              console.log( 'Running total', (this.blockday_api_import.length + this.blockday_table_error_count))
+            })
+            .catch(error => {
+              this.blockday_table_error_count += 1
+              // this.table_failed = true
+              // this.failed_error_message = error
+              if (error.response) {
+                // client received an error response (5xx, 4xx)
+                let failed_date = error.response.config.url.slice(-10)
+                this.makeToast('danger', `${failed_date}: BlockDay Import Failed`, ('Response Error: ' + error), false)
+                console.log('BlockDay Retrieval Failure:', error.response.config.url.slice(-10))
+              } else if (error.request) {
+                this.makeToast('danger', `BlockDay Import Failed`, ('Request Error: ' + error))
+                // client never received a response, or request never left
+                this.api_busy = false
+                this.table_failed = true
+                console.log(error.request)
+              } else {
+                console.log('nothing received')
+                // anything else
+              }
+            })
+            .finally(()=>{
+              if (url_list.length === (this.blockday_api_import.length + this.blockday_table_error_count)) {
                 this.blockday_table = this.blockday_api_import
+                this.blockday_import_completed = true
                 this.blockday_table_busy = false
                 this.api_busy = false
               }
-            })
-            .catch(error => {
-              // this.table_failed = true
-              // this.failed_error_message = error
-              this.api_busy = false
-              console.log(error)
-            })
+        })
         )
       }
+      if (url_list.length === (this.blockday_api_import.length + this.blockday_table_error_count)) {
+        this.blockday_table = this.blockday_api_import
+        this.blockday_table_busy = false
+        this.api_busy = false
+      }
+      this.currency_value_retriever()
     },
     history_cookies() {
       let previous_searches = []
+      let current_time = new Date()
+
       if (this.$cookies.get('previous_searches')) {
         previous_searches = JSON.parse(this.$cookies.get('previous_searches'))
       }
-
       if (this.from_picker_date && this.to_picker_date) {
-        previous_searches.push({from_date: this.from_picker_date, to_date: this.to_picker_date})
+        previous_searches.push({
+          from_date: this.from_picker_date,
+          to_date: this.to_picker_date,
+          request_date: current_time
+        })
         let previous_searches_string = JSON.stringify(previous_searches)
         this.$cookies.set("previous_searches", previous_searches_string)
       }
-
-      // previous_searches.sort(function(a,b){
-      //   console.log("Sorting")
-      //   console.log(a['from_date'])
-      //   console.log(b['from_date'])
-      //   return new Date(b['from_date']) - new Date(a['from_date'])
-      // })
-
-      console.log(previous_searches)
-
+      previous_searches.sort(function (a, b) {
+        return new Date(b['request_date']) - new Date(a['request_date'])
+      })
       let filtered_searches = []
       for (let x in previous_searches) {
         let in_list = false
         for (let search in filtered_searches) {
           if (previous_searches[x].from_date === filtered_searches[search].from_date && previous_searches[x].to_date === filtered_searches[search].to_date) {
             in_list = true
-            console.log('In List: ', in_list)
           }
         }
         if (!in_list) {
@@ -524,10 +648,8 @@ export default {
         }
       }
 
-      console.log(filtered_searches)
-
       this.previous_search_selection_options = [
-        {value: null, text: 'Select a Previous Search'}
+        {value: null, text: 'Select Search'}
       ]
 
       for (let x in filtered_searches) {
@@ -542,7 +664,8 @@ export default {
       if (!(items.length === 0)) {
         this.blockday_selected = true
         this.blockday_table_selection = items
-        this.block_csv_data_link = `${this.$root.api_combined_address}/csv/block?date=${Object.values(items)[0]['_id']}`
+        this.blockday_selected_date = Object.values(items)[0]['_id']
+        this.block_csv_data_link = `${this.$root.api_combined_address}/csv/block?date=${this.blockday_selected_date}`
         let block_list = Object.values(items)[0]['blocks']
         this.block_list_axios_importer(block_list)
 
@@ -559,7 +682,7 @@ export default {
 
       for (let x in block_list) {
         let block_list_combined_url = block_list_base_url + `?hash=${block_list[x]}`
-        console.log(block_list_combined_url)
+        console.log('Block list combined url', block_list_combined_url)
         promise_list.push(limiter.schedule(() => axios.get(block_list_combined_url))
             .then((results) => {
               this.block_list_api_import.push(results['data'])
@@ -570,10 +693,19 @@ export default {
               }
             })
             .catch(error => {
-              this.table_failed = "Failed"
-              this.failed_error_message = error
+              let status_code = error.response.status
+              console.log('Block list importer error:', status_code)
+
+              if (status_code === 404) {
+                this.makeToast('warning', 'Block Data Missing', error, false)
+                console.log("Data for Block missing")
+              } else {
+                this.makeToast('danger', 'Block Data Retrieval Failure', error, false)
+                this.table_failed = "Failed"
+                this.failed_error_message = error
+              }
               this.api_busy = false
-              console.log(error)
+              console.log('Block retrieval error:', error.response)
             })
         )
       }
@@ -582,7 +714,7 @@ export default {
       this.transaction_list_api_import = []
       if (!(items.length === 0)) {
         this.block_selected = true
-        this.block_Table_selection = items
+        this.block_table_selection = items
         let transaction_list = Object.values(items)[0]['tx']
         this.transaction_csv_data_link = `${this.$root.api_combined_address}/csv/transactions?hash=${Object.values(items)[0]['_id']}`
         this.transaction_list_axios_importer(transaction_list)
@@ -610,20 +742,59 @@ export default {
               }
             })
             .catch(error => {
-              this.table_failed = "Failed"
               this.api_busy = false
               this.failed_error_message = error
+              this.makeToast('danger', 'Transaction Retrieval Failure', error, false)
               console.log(error)
             })
       }
     },
-    exported_sat_to_btc: function (input) {
-      if ((input / 100000000).toFixed(2) > 0) {
-        return ((input / 100000000).toFixed(2)).toLocaleString('en-GB') + ' BTC'
+    currency_value_retriever: function () {
+      let currency_retrieval_url = `${this.$root.api_combined_address}/currency?date_from=${this.from_picker_date}&date_to=${this.to_picker_date}`
+      console.log('Currency Retrieval', currency_retrieval_url)
+      axios.get(currency_retrieval_url)
+          .then(results => {
+            console.log(results)
+            this.currency_data = results.data
+          })
+          .catch(error => {
+            console.log('Transaction Retrieval Error:', error)
+          })
+    },
+
+
+    currency_formatter: function (input, key, item, toFixed = 2) {
+      if (this.currency_chosen_value === 'XBP') {
+        if ((input / 100000000).toFixed(2) > 0) {
+          return '₿' + ((input / 100000000).toFixed(toFixed)).toLocaleString('en-GB')
+        } else {
+          return '₿' + ((input / 100000000).toFixed(toFixed)).toLocaleString('en-GB')
+        }
       } else {
-        return ((input / 100000000).toFixed(6)).toLocaleString('en-GB') + ' BTC'
+        let sat_to_btc = input / 100000000
+
+        let initial_date_string = ''
+
+        if (this.blockday_selected) {
+          initial_date_string = this.blockday_selected_date
+        } else {
+          initial_date_string = item._id
+        }
+        let retrieval_date_string = initial_date_string.slice(4) + '-' + initial_date_string.slice(2, 4) + '-' + initial_date_string.slice(0, 2)
+
+        let usd_value = this.currency_data[retrieval_date_string]['USD']
+        let USD_value = (sat_to_btc * usd_value)
+        let USD_fixed_value = 0
+
+        if (USD_value.toFixed(toFixed) > 0) {
+          USD_fixed_value = USD_value.toFixed(toFixed)
+        } else {
+          USD_fixed_value = USD_value.toFixed(6)
+        }
+        return USD_formatter.format(USD_fixed_value)
       }
     },
+
     slice_date_string: function (input) {
       return input.slice(0, 2) + '/' + input.slice(2, 4) + '/' + input.slice(4)
     },
