@@ -8,8 +8,8 @@
       </b-col>
     </b-row>
 
-    <b-row>
-      <b-col class="mb-4">
+    <b-row class="mb-4">
+      <b-col >
         <b-input-group prepend="Currency" size="lg">
           <b-form-select v-model="currency_chosen_value"
                          :disabled="api_busy"
@@ -20,8 +20,8 @@
       </b-col>
     </b-row>
 
-    <b-row><!--DAte Pickers-->
-      <b-col class="mt-2" xl="6">
+    <b-row class="mt-2 mb-4"><!--DAte Pickers-->
+      <b-col xl="6">
         <b-input-group prepend="From Date" size="lg">
           <b-form-datepicker id="from_date_picker_block"
                              v-model="from_picker_date"
@@ -32,7 +32,7 @@
           </b-form-datepicker>
         </b-input-group>
       </b-col>
-      <b-col class="mt-2" xl="">
+      <b-col xl="">
         <b-input-group prepend="To Date" size="lg">
           <b-form-datepicker id="to_date_picker_block"
                              v-model="to_picker_date"
@@ -45,8 +45,8 @@
       </b-col>
     </b-row>
 
-    <b-row v-if="this.$cookies.get('previous_searches')">
-      <b-col class="mt-2">
+    <b-row class="mt-2 mb-4" v-if="this.$cookies.get('previous_searches')">
+      <b-col >
         <b-input-group prepend="Previous Searches" size="lg">
           <b-form-select v-model="previous_search_selection"
                          :disabled="api_busy"
@@ -69,9 +69,10 @@
     <b-row v-if="api_busy && (blockday_table_import_progress > 0 || blockday_table_error_count > 0)">
       <b-col>
       <span>
-        <b-progress height="2rem" :max="blockday_table_import_max"  class="mb-3" show-value>
-          <b-progress-bar :value="blockday_table_import_progress" variant="info" ></b-progress-bar>
-          <b-progress-bar :value="blockday_table_error_count" variant="danger" ></b-progress-bar>
+        <b-progress height="2rem" :max="blockday_table_import_max"  class="mb-3" show-value >
+          <b-progress-bar :value="blockday_table_import_progress" variant="info" :label="`${(blockday_table_import_progress)} RETRIEVED`" ></b-progress-bar>
+          <b-progress-bar :value="blockday_table_error_count" variant="danger" :label="`${(blockday_table_error_count)} / ${(blockday_table_import_max)} FAILED`" ></b-progress-bar>
+          <b-progress-bar :value="future_blockday_import" variant="warning" :label="`${(future_blockday_import)} PENDING`" animated></b-progress-bar>
         </b-progress>
       </span>
       </b-col>
@@ -117,8 +118,7 @@
       <b-col>
         <b-button :disabled="block_table_busy || api_busy" :href="block_csv_data_link" block
                   variant="outline-secondary">
-          <b-icon-download></b-icon-download>
-          Download .CSV
+          <strong><b-icon-download></b-icon-download> Download .CSV</strong>
         </b-button>
       </b-col>
     </b-row>
@@ -263,17 +263,14 @@
 <script>
 import axios from "axios"
 import Bottleneck from "bottleneck"
+import currency_formatter from "@/currency_formatter";
 
 const limiter = new Bottleneck({
   minTime: 20
 })
 
-const USD_formatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD'
-})
-
 export default {
+  extends: currency_formatter,
   name: "BlockExplorer",
 
   data() {
@@ -522,6 +519,11 @@ export default {
       this.to_picker_date = selection['to_date']
     }
   },
+  computed:{
+    future_blockday_import: function(){
+      return (this.blockday_table_import_max - (this.blockday_table_import_progress+this.blockday_table_error_count))
+    }
+  },
 
   methods: {
     makeToast: function (variant = null, title = null, body = null, auto_hide = true) {
@@ -760,39 +762,6 @@ export default {
           .catch(error => {
             console.log('Transaction Retrieval Error:', error)
           })
-    },
-
-
-    currency_formatter: function (input, key, item, toFixed = 2) {
-      if (this.currency_chosen_value === 'XBP') {
-        if ((input / 100000000).toFixed(2) > 0) {
-          return '₿' + ((input / 100000000).toFixed(toFixed)).toLocaleString('en-GB')
-        } else {
-          return '₿' + ((input / 100000000).toFixed(toFixed)).toLocaleString('en-GB')
-        }
-      } else {
-        let sat_to_btc = input / 100000000
-
-        let initial_date_string = ''
-
-        if (this.blockday_selected) {
-          initial_date_string = this.blockday_selected_date
-        } else {
-          initial_date_string = item._id
-        }
-        let retrieval_date_string = initial_date_string.slice(4) + '-' + initial_date_string.slice(2, 4) + '-' + initial_date_string.slice(0, 2)
-
-        let usd_value = this.currency_data[retrieval_date_string]['USD']
-        let USD_value = (sat_to_btc * usd_value)
-        let USD_fixed_value = 0
-
-        if (USD_value.toFixed(toFixed) > 0) {
-          USD_fixed_value = USD_value.toFixed(toFixed)
-        } else {
-          USD_fixed_value = USD_value.toFixed(6)
-        }
-        return USD_formatter.format(USD_fixed_value)
-      }
     },
 
     slice_date_string: function (input) {
