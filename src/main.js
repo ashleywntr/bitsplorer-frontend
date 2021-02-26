@@ -24,7 +24,7 @@ Vue.prototype.$axios = axios
 Vue.config.productionTip = false
 Vue.$cookies.config('7d')
 
-let api_address = '192.168.1.194'
+let api_address = 'py-chain.ddns.net'
 let api_port = '55397'
 
 new Vue({

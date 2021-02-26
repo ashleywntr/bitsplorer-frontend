@@ -1,14 +1,12 @@
 <template>
   <div id="app">
-      <b-navbar class ="navbar navbar-light navbar-expand-md" toggleable="md">
-        <div class="container-fluid">
+      <b-navbar class ="navbar navbar-light navbar-expand-md" toggleable="md" sticky>
           <b-navbar-brand>
             <router-link class="navbar-brand" to="/">
               <strong>py-chain</strong>
             </router-link>
             <b-nav-text>{{this.$root.app_state}}</b-nav-text>
           </b-navbar-brand>
-
           <b-navbar-toggle target="nav-text-collapse"></b-navbar-toggle>
           <b-collapse id="nav-text-collapse" is-nav>
             <b-navbar-nav>
@@ -19,23 +17,40 @@
               <b-nav-text><router-link class="nav-link" to="/Settings">Settings</router-link></b-nav-text>
               <b-nav-text><router-link class="nav-link" to="/Visualiser">Visualiser</router-link></b-nav-text>
             </b-navbar-nav>
+
+            <b-navbar-nav class="ml-auto">
+              <b-nav-form>
+              <b-input-group prepend="Currency">
+                <b-form-select v-model="currency_chosen_value"
+                               :disabled="api_busy"
+                               :options="currency_options"
+                >
+                </b-form-select>
+                <b-input-group-append>
+                  <b-input-group-text>
+                    <div>{{connection_status}}</div>
+                  </b-input-group-text>
+                </b-input-group-append>
+              </b-input-group>
+              </b-nav-form>
+            </b-navbar-nav>
+
           </b-collapse>
-        </div>
       </b-navbar>
-    <div>
+
+    <div class="mt-5">
       <RouterView></RouterView>
     </div>
 
     <div class="footer-basic">
       <footer>
-        <p class="text-center">{{connection_status}}</p>
         <div class="social"><img alt="bitcoin logo public domain" class="img-fluid"
                                  src="./assets/img/Bitcoin_logo.svg" style="width: 196px;"></div>
-        <ul class="list-inline">
-          <li class="list-inline-item"><router-link to="/">Home</router-link></li>
-        </ul>
-        <p class="copyright">py-chain 2021</p>
-        <p class="copyright">Historical Price Data Powered by <a href="https://www.coindesk.com/price/bitcoin">CoinDesk</a></p>
+<!--        <ul class="list-inline">-->
+<!--          <li class="list-inline-item"><router-link to="/">Home</router-link></li>-->
+<!--        </ul>-->
+        <div class="copyright">py-chain 2021</div>
+        <div class="copyright">Historical Price Data Powered by <a href="https://www.coindesk.com/price/bitcoin">CoinDesk</a></div>
       </footer>
     </div>
   </div>
@@ -58,15 +73,15 @@ export default {
     axios.get(url)
       .then(response=>{
         if(response.status===200){
-          this.connection_status=`Connected to API`
+          this.connection_status=`API Online`
         }
         else{
-          this.connection_status = 'Disconnected from Server'
+          this.connection_status = 'API Offline'
         }
       })
       .catch()
     {
-      this.connection_status = 'Disconnected from Server'
+      this.connection_status = 'API Offline'
     }
 
   },

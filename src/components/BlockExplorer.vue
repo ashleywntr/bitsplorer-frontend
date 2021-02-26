@@ -20,8 +20,8 @@
       </b-col>
     </b-row>
 
-    <b-row class="mt-2 mb-4"><!--DAte Pickers-->
-      <b-col xl="6">
+    <b-row class="mt-2 "><!--DAte Pickers-->
+      <b-col xl="6" class="mb-2">
         <b-input-group prepend="From Date" size="lg">
           <b-form-datepicker id="from_date_picker_block"
                              v-model="from_picker_date"
@@ -45,7 +45,7 @@
       </b-col>
     </b-row>
 
-    <b-row class="mt-2 mb-4" v-if="this.$cookies.get('previous_searches')">
+    <b-row class="mt-4 mb-4" v-if="this.$cookies.get('previous_searches')">
       <b-col >
         <b-input-group prepend="Previous Searches" size="lg">
           <b-form-select v-model="previous_search_selection"
@@ -66,7 +66,7 @@
       </b-col>
     </b-row>
 
-    <b-row v-if="api_busy && (blockday_table_import_progress > 0 || blockday_table_error_count > 0)">
+    <b-row v-if="api_busy">
       <b-col>
       <span>
         <b-progress height="2rem" :max="blockday_table_import_max"  class="mb-3" show-value >
@@ -263,15 +263,40 @@
 <script>
 import axios from "axios"
 import Bottleneck from "bottleneck"
-import currency_formatter from "@/currency_formatter";
+const USD_formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD'
+})
+
+const GBP_formatter = new Intl.NumberFormat('en-GB', {
+  style: 'currency',
+  currency: 'GBP'
+})
+
+const EUR_formatter = new Intl.NumberFormat('en-GB', {
+  style: 'currency',
+  currency: 'EUR'
+})
+
+const CNY_formatter = new Intl.NumberFormat('en-GB', {
+  style: 'currency',
+  currency: 'CNY'
+})
 
 const limiter = new Bottleneck({
   minTime: 20
 })
 
 export default {
-  extends: currency_formatter,
   name: "BlockExplorer",
+
+  props:{
+    selected_currency:{
+      type: String,
+      required: true
+    }
+
+  },
 
   data() {
     const now = new Date
@@ -293,8 +318,9 @@ export default {
       currency_options: [
         {value: 'XBP', text: '₿ XBP'},
         {value: 'USD', text: '$ USD'},
-        {value: 'GBP', text: '£ GBP', disabled: true},
-        {value: 'EUR', text: '€ EUR', disabled: true}
+        {value: 'GBP', text: '£ GBP'},
+        {value: 'EUR', text: '€ EUR'},
+        {value: 'CNY', text: '¥ CNY'}
       ],
       working_currency_value: 0.0,
       working_date: '',
@@ -762,6 +788,48 @@ export default {
           .catch(error => {
             console.log('Transaction Retrieval Error:', error)
           })
+    },
+
+    currency_formatter: function (input, key, item, toFixed = 2) {
+      if (this.currency_chosen_value === 'XBP') {
+        if ((input / 100000000).toFixed(2) > 0) {
+          return '₿' + ((input / 100000000).toFixed(toFixed)).toLocaleString('en-GB')
+        } else {
+          return '₿' + ((input / 100000000).toFixed(6)).toLocaleString('en-GB')
+        }
+      } else {
+        let sat_to_btc = input / 100000000
+
+        let initial_date_string = ''
+
+        if (this.blockday_selected) {
+          initial_date_string = this.blockday_selected_date
+        } else {
+          initial_date_string = item._id
+        }
+        let retrieval_date_string = initial_date_string.slice(4) + '-' + initial_date_string.slice(2, 4) + '-' + initial_date_string.slice(0, 2)
+
+        let selected_base = this.currency_data[retrieval_date_string][this.currency_chosen_value]
+        let currency_value = (sat_to_btc * selected_base)
+        let fixed_value = 0
+
+        if (currency_value.toFixed(toFixed) > 0){
+          fixed_value = currency_value.toFixed(toFixed)
+        } else {
+          fixed_value = currency_value.toFixed(6)
+        }
+        if (this.currency_chosen_value === 'USD'){
+          return USD_formatter.format(fixed_value)
+        }else if (this.currency_chosen_value === 'GBP'){
+            return GBP_formatter.format(fixed_value)
+        }
+        else if (this.currency_chosen_value === 'EUR'){
+          return EUR_formatter.format(fixed_value)
+        }
+        else if (this.currency_chosen_value === 'CNY'){
+          return CNY_formatter.format(fixed_value)
+        }
+      }
     },
 
     slice_date_string: function (input) {

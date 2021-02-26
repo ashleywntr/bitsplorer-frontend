@@ -69,7 +69,7 @@
 
       <!-- Add bottom legend -->
       <breadcrumbTrail slot="legend" slot-scope="{ nodes, colorGetter, width }" :colorGetter="colorGetter"
-                       :current="nodes.mouseOver" :from="nodes.clicked" :root="nodes.root" :width="width" />
+                       :current="nodes.mouseOver" :from="nodes.clicked" :root="nodes.root" :width="width" :item-height="50" />
     </sunburst>
       </b-col>
     </b-row>
