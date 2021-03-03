@@ -303,7 +303,6 @@ export default {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const max_date = new Date(today)
     const first_bitcoin_block = new Date('2009-01-09')
-    document.title = "test"
     return {
 
       previous_searches_exported: [],

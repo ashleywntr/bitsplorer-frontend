@@ -13,19 +13,19 @@
               <b-nav-text><router-link class="nav-link" to="/">Home</router-link></b-nav-text>
               <b-nav-text><router-link class="nav-link" to="/AddressExplorer">Address Explorer</router-link></b-nav-text>
               <b-nav-text><router-link class="nav-link" to="/BlockExplorer">Block Explorer</router-link></b-nav-text>
-              <b-nav-text><router-link class="nav-link" to="/SavedSearches">Saved Searches</router-link></b-nav-text>
+<!--              <b-nav-text><router-link class="nav-link" to="/SavedSearches">Saved Searches</router-link></b-nav-text>-->
               <b-nav-text><router-link class="nav-link" to="/Settings">Settings</router-link></b-nav-text>
               <b-nav-text><router-link class="nav-link" to="/Visualiser">Visualiser</router-link></b-nav-text>
             </b-navbar-nav>
 
             <b-navbar-nav class="ml-auto">
               <b-nav-form>
-              <b-input-group prepend="Currency">
-                <b-form-select v-model="currency_chosen_value"
-                               :disabled="api_busy"
-                               :options="currency_options"
-                >
-                </b-form-select>
+              <b-input-group>
+<!--                <b-form-select v-model="currency_chosen_value"-->
+<!--                               :disabled="api_busy"-->
+<!--                               :options="currency_options"-->
+<!--                >-->
+<!--                </b-form-select>-->
                 <b-input-group-append>
                   <b-input-group-text>
                     <div>{{connection_status}}</div>
