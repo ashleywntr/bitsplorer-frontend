@@ -55,7 +55,7 @@
 
     <b-row>
       <b-col>
-    <sunburst :data="sunburst_data" style="min-height:70vmin" :minAngleDisplayed=string_to_value(display_range)>
+    <sunburst :data="sunburst_data" style="min-height:60vmin" :minAngleDisplayed=string_to_value(display_range)>
 
       <!-- Add behaviors -->
       <template slot-scope="{ on, actions }">
@@ -69,7 +69,7 @@
 
       <!-- Add bottom legend -->
       <breadcrumbTrail slot="legend" slot-scope="{ nodes, colorGetter, width }" :colorGetter="colorGetter"
-                       :current="nodes.mouseOver" :from="nodes.clicked" :root="nodes.root" :width="width" :item-height="50" />
+                       :current="nodes.mouseOver" :from="nodes.clicked" :root="nodes.root" :width="width"/>
     </sunburst>
       </b-col>
     </b-row>
