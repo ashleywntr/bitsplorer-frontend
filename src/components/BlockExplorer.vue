@@ -16,11 +16,17 @@
                          :options="currency_options"
           >
           </b-form-select>
+          <b-input-group-append v-if="from_picker_date && to_picker_date">
+            <b-button variant="outline-secondary">
+              <b-icon-download></b-icon-download>
+              Download Currency .CSV
+            </b-button>
+          </b-input-group-append>
         </b-input-group>
       </b-col>
     </b-row>
 
-    <b-row class="mt-2 "><!--DAte Pickers-->
+    <b-row class="mt-2 "><!--Date Pickers-->
       <b-col xl="6" class="mb-2">
         <b-input-group prepend="From Date" size="lg">
           <b-form-datepicker id="from_date_picker_block"
@@ -77,13 +83,6 @@
       </span>
       </b-col>
     </b-row>
-
-    <!--    <b-row v-if="table_failed" class="m-1 d-flex flex-row align-items-center">-->
-    <!--      <b-col>-->
-    <!--        <h2 class="text-danger text-center">❌ {{ failed_error_message }}</h2>-->
-    <!--      </b-col>-->
-    <!--    </b-row>-->
-
 
     <!--BlockDay Table-->
     <b-row v-if="blockday_import_completed" class="pl-2 pr-2">
