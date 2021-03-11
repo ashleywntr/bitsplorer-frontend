@@ -29,7 +29,7 @@ let api_port = '55397'
 
 new Vue({
     data: {
-        app_state: 'Dev',
+        app_state: 'Test',
         api_combined_address: `http://${api_address}:${api_port}/api`,
         coindesk_root_url: "https://api.coindesk.com/v1/bpi",
         api_port: api_port,
