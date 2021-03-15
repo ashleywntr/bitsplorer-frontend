@@ -17,7 +17,7 @@
           >
           </b-form-select>
           <b-input-group-append v-if="from_picker_date && to_picker_date">
-            <b-button variant="outline-secondary">
+            <b-button variant="outline-secondary" :href=currency_csv_download_url >
               <b-icon-download></b-icon-download>
               Download Currency .CSV
             </b-button>
@@ -336,6 +336,8 @@ export default {
       to_picker_date_disabled: true,
       to_picker_date: null,
 
+      currency_csv_download_url: "",
+
       table_failed: false,
       failed_error_message: null,
 
@@ -536,6 +538,7 @@ export default {
     to_picker_date: function (new_value) {
       console.log("To Date:", new_value)
       this.import_button_disabled = false
+      this.currency_csv_download_url = `${this.$root.api_combined_address}/csv/currency?date_from=${this.from_picker_date}&date_to=${this.to_picker_date}`
     },
     previous_search_selection: function (selection) {
       this.from_picker_date = selection['from_date']
