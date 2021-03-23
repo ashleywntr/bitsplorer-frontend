@@ -1,5 +1,6 @@
 <template>
-  <b-container class="p-3">
+  <div>
+  <b-container class="p-3 mb-3">
     <b-row>
       <b-col>
         <h1><strong>Block Explorer</strong></h1>
@@ -9,7 +10,7 @@
     </b-row>
 
     <b-row class="mb-4">
-      <b-col >
+      <b-col>
         <b-input-group prepend="Currency" size="lg">
           <b-form-select v-model="currency_chosen_value"
                          :disabled="api_busy"
@@ -17,9 +18,9 @@
           >
           </b-form-select>
           <b-input-group-append v-if="from_picker_date && to_picker_date">
-            <b-button variant="outline-secondary" :href=currency_csv_download_url >
+            <b-button :href=currency_csv_download_url variant="outline-secondary">
               <b-icon-download></b-icon-download>
-              Download Currency .CSV
+              Currency Data (CSV)
             </b-button>
           </b-input-group-append>
         </b-input-group>
@@ -27,7 +28,7 @@
     </b-row>
 
     <b-row class="mt-2 "><!--Date Pickers-->
-      <b-col xl="6" class="mb-2">
+      <b-col class="mb-2" xl="6">
         <b-input-group prepend="From Date" size="lg">
           <b-form-datepicker id="from_date_picker_block"
                              v-model="from_picker_date"
@@ -51,8 +52,8 @@
       </b-col>
     </b-row>
 
-    <b-row class="mt-4 mb-4" v-if="this.$cookies.get('previous_searches')">
-      <b-col >
+    <b-row v-if="this.$cookies.get('previous_searches')" class="mt-2 mb-4">
+      <b-col>
         <b-input-group prepend="Previous Searches" size="lg">
           <b-form-select v-model="previous_search_selection"
                          :disabled="api_busy"
@@ -67,25 +68,29 @@
         <b-button :disabled="import_button_disabled || api_busy===true"
                   block class="mt-2"
                   variant="primary"
+                  size="lg"
                   @click="import_button_click">Import Data
         </b-button>
       </b-col>
     </b-row>
 
-    <b-row v-if="api_busy">
+    <b-row v-if="api_busy && !blockday_selected">
       <b-col>
       <span>
-        <b-progress height="2rem" :max="blockday_table_import_max"  class="mb-3" show-value >
-          <b-progress-bar :value="blockday_table_import_progress" variant="info" :label="`${(blockday_table_import_progress)} RETRIEVED`" ></b-progress-bar>
-          <b-progress-bar :value="blockday_table_error_count" variant="danger" :label="`${(blockday_table_error_count)} / ${(blockday_table_import_max)} FAILED`" ></b-progress-bar>
-          <b-progress-bar :value="future_blockday_import" variant="warning" :label="`${(future_blockday_import)} PENDING`" animated></b-progress-bar>
+        <b-progress :max="blockday_table_import_max" class="mb-3" height="2rem" show-value>
+          <b-progress-bar :label="`${(blockday_table_import_progress)} RETRIEVED`" :value="blockday_table_import_progress"
+                          variant="info"></b-progress-bar>
+          <b-progress-bar :label="`${(blockday_table_error_count)} / ${(blockday_table_import_max)} FAILED`" :value="blockday_table_error_count"
+                          variant="danger"></b-progress-bar>
+          <b-progress-bar :label="`${(future_blockday_import)} PENDING`" :value="future_blockday_import"
+                          animated variant="warning"></b-progress-bar>
         </b-progress>
       </span>
       </b-col>
     </b-row>
 
     <!--BlockDay Table-->
-    <b-row v-if="blockday_import_completed" class="pl-2 pr-2">
+    <b-row v-if="blockday_table && !blockday_table_busy" class="mt-4">
       <b-col>
         <b-table :busy="blockday_table_busy"
                  :fields="blockday_table_fields"
@@ -93,77 +98,87 @@
                  :sort-by.sync="blockday_table_sort_by"
                  bordered
                  class=""
-                 hover
-                 responsive
+                 :hover="!api_busy"
+                 :responsive="true"
                  select-mode="single"
-                 selectable
+                 :selectable="!api_busy"
+                 selected-variant="primary"
                  sticky-header="50vh"
-                 selected-variant="primary" @row-selected="on_blockday_table_row_selected">
-          <template #table-busy>
-            <div class="text-danger d-flex flex-column align-items-center justify-content-center">
-              <b-spinner class="pt-2" style="width: 7rem; height: 7rem;"></b-spinner>
-              <span class="pt-2">{{ blockday_table_import_progress_string }}</span>
-            </div>
-          </template>
+                 @row-selected="on_blockday_table_row_selected">
         </b-table>
       </b-col>
     </b-row>
+  </b-container>
 
     <!--Block Table-->
-    <b-row v-if="blockday_selected && !table_failed" class="pl-2 pr-2">
-      <b-col>
+    <b-container v-if="blockday_selected" class="p-3 mb-3">
+    <b-row v-if="blockday_selected" class="">
+      <b-col class="d-flex">
         <h2><strong>Blocks on {{ slice_date_string(blockday_table_selection[0]['_id']) }}</strong></h2>
-      </b-col>
-      <b-col>
-        <b-button :disabled="block_table_busy || api_busy" :href="block_csv_data_link" block
-                  variant="outline-secondary">
-          <strong><b-icon-download></b-icon-download> Download .CSV</strong>
+        <b-button :disabled="block_table_busy || api_busy" :href="block_csv_data_link"
+                  class="ml-auto m-2" variant="outline-secondary">
+          <b-icon-download></b-icon-download>
+          Block Data (CSV)
+        </b-button>
+        <b-button class="m-2" :disabled="api_busy" @click="blockday_selected = false; block_selected = false" variant="outline-danger">
+          X
         </b-button>
       </b-col>
     </b-row>
 
-    <b-row v-if="blockday_selected && !table_failed" class="pl-4 pr-2">
+    <b-row v-if="blockday_selected" class="mb-2">
       <b-col class="">
-        <b-row>
           <b-table :busy="block_table_busy"
                    :fields="block_table_fields"
                    :items="block_table"
-                   :selectable="!api_busy"
                    :sort-by.sync="block_table_sort_by"
                    bordered
                    class=""
-                   hover
-                   responsive
+                   :hover="!api_busy"
+                   :responsive="true"
                    select-mode="single"
+                   :selectable="true"
                    selected-variant="primary"
-                   sticky-header="85vh" @row-selected="on_block_table_row_selected">
+                   sticky-header="45vh"
+                   @row-selected="on_block_table_row_selected">
             <template #table-busy>
-              <div class="text-danger d-flex flex-column align-items-center justify-content-center">
-                <b-spinner class="pt-2" style="width: 7rem; height: 7rem;"></b-spinner>
-                <span class="pt-2">{{ block_table_import_progress }}</span>
-              </div>
+              <b-row>
+                <b-col>
+                  <span>
+                    <b-progress :max="block_table_import_max" class="mb-3" height="2rem" show-value>
+                      <b-progress-bar :label="`${(block_table_import_progress)} RETRIEVED`" :value="block_table_import_progress"
+                                      variant="info"></b-progress-bar>
+                      <b-progress-bar :label="`${(block_table_error_count)} / ${(block_table_import_max)} FAILED`" :value="block_table_error_count"
+                                      variant="danger"></b-progress-bar>
+                      <b-progress-bar :label="`${(future_block_import)} PENDING`" :value="future_block_import"
+                                      animated variant="warning"></b-progress-bar>
+                    </b-progress>
+                  </span>
+                </b-col>
+              </b-row>
             </template>
           </b-table>
-        </b-row>
       </b-col>
     </b-row>
+    </b-container>
 
     <!--Transaction Table-->
-    <b-row v-if="blockday_selected && block_selected && !table_failed">
-      <b-col>
+  <b-container v-if="blockday_selected && block_selected" class="p-3 mb-3">
+    <b-row v-if="blockday_selected && block_selected" class="mb-2">
+      <b-col class="d-flex ">
         <h2><strong>Transactions for Block {{ block_table_selection[0]['height'] }}</strong></h2>
-      </b-col>
-      <b-col>
-        <b-button :disabled="transaction_table_busy || api_busy" :href="transaction_csv_data_link" block hover
-                  variant="outline-secondary">
+        <b-button :disabled="transaction_table_busy || api_busy" :href="transaction_csv_data_link" class="ml-auto m-2"
+                  hover variant="outline-secondary">
           <b-icon-download></b-icon-download>
-          Download .CSV
+          Transaction Data (CSV)
+        </b-button>
+        <b-button class="m-2" :disabled="api_busy" @click="block_selected = false" variant="outline-danger">
+          X
         </b-button>
       </b-col>
     </b-row>
 
-
-    <b-row v-if="blockday_selected && block_selected && !table_failed">
+    <b-row v-if="blockday_selected && block_selected">
       <b-col>
         <b-table :busy="transaction_table_busy"
                  :fields="transaction_table_fields"
@@ -176,10 +191,20 @@
                  sticky-header="85vh">
 
           <template #table-busy>
-            <div class="text-danger d-flex flex-column align-items-center justify-content-center">
-              <b-spinner class="pt-2" style="width: 7rem; height: 7rem;"></b-spinner>
-              <span class="pt-2">{{ transaction_table_import_progress }}</span>
-            </div>
+            <b-row>
+              <b-col>
+                  <span>
+                    <b-progress :max="transaction_table_import_max" class="mb-3" height="2rem" show-value>
+                      <b-progress-bar :label="`${(transaction_table_import_progress)} RETRIEVED`" :value="transaction_table_import_progress"
+                                      variant="info"></b-progress-bar>
+                      <b-progress-bar :label="`${(transaction_table_error_count)} / ${(transaction_table_import_max)} FAILED`" :value="transaction_table_error_count"
+                                      variant="danger"></b-progress-bar>
+                      <b-progress-bar :label="`${(future_transaction_import)} PENDING`" :value="future_transaction_import"
+                                      animated variant="warning"></b-progress-bar>
+                    </b-progress>
+                  </span>
+              </b-col>
+            </b-row>
           </template>
 
           <template #cell(show_details)="row">
@@ -256,12 +281,14 @@
     </b-row>
 
   </b-container>
+  </div>
 </template>
 
 
 <script>
 import axios from "axios"
 import Bottleneck from "bottleneck"
+
 const USD_formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD'
@@ -289,12 +316,7 @@ const limiter = new Bottleneck({
 export default {
   name: "BlockExplorer",
 
-  props:{
-    selected_currency:{
-      type: String,
-      required: true
-    }
-
+  props: {
   },
 
   data() {
@@ -338,12 +360,7 @@ export default {
 
       currency_csv_download_url: "",
 
-      table_failed: false,
-      failed_error_message: null,
-
       import_button_disabled: true,
-
-      date_selected: false,
 
       blockday_table_busy: false,
       blockday_table_import_progress_string: null,
@@ -421,7 +438,11 @@ export default {
       block_csv_data_link: "",
       block_table_busy: true,
       block_table_selection: [],
-      block_table_import_progress: "",
+
+      block_table_import_progress: null,
+      block_table_import_max: null,
+      block_table_error_count: null,
+
       block_table_fields: [
         {key: "height", sortable: true, stickyColumn: true, isRowHeader: true},
         {
@@ -491,7 +512,11 @@ export default {
       transaction_table_sort_by: 'coinbase_transaction',
       transaction_csv_data_link: "",
       transaction_table_busy: true,
-      transaction_table_import_progress: "",
+
+      transaction_table_import_progress: null,
+      transaction_table_import_max: null,
+      transaction_table_error_count: null,
+
       transaction_table_fields: [
         {
           key: "coinbase_transaction", label: "", sortable: true, formatter: value => {
@@ -546,10 +571,16 @@ export default {
       this.to_picker_date = selection['to_date']
     }
   },
-  computed:{
-    future_blockday_import: function(){
-      return (this.blockday_table_import_max - (this.blockday_table_import_progress+this.blockday_table_error_count))
-    }
+  computed: {
+    future_blockday_import: function () {
+      return (this.blockday_table_import_max - (this.blockday_table_import_progress + this.blockday_table_error_count))
+    },
+    future_block_import: function () {
+      return (this.block_table_import_max - (this.block_table_import_progress + this.block_table_error_count))
+    },
+    future_transaction_import: function () {
+      return (this.transaction_table_import_max - (this.transaction_table_import_progress + this.transaction_table_error_count))
+    },
   },
 
   methods: {
@@ -569,11 +600,8 @@ export default {
       this.previous_search_selection = null
     },
     blockday_axios_importer: function () {
-      this.table_failed = false
       this.api_busy = true
-      this.date_selected = true
       this.blockday_table_busy = true
-      this.blockday_import_completed = false
 
       this.blockday_table_error_count = 0
 
@@ -597,7 +625,6 @@ export default {
         working_date.setDate(working_date.getDate() + 1)
       }
       console.log('BlockDay url list: ', url_list)
-      this.blockday_table_import_progress_string = `0 / ${url_list.length}`
       this.blockday_table_import_max = url_list.length
 
       for (let x in url_list) {
@@ -605,13 +632,9 @@ export default {
             .then((results) => {
               this.blockday_api_import.push(results['data'])
               this.blockday_table_import_progress = this.blockday_api_import.length
-              this.blockday_table_import_progress_string = `${this.blockday_table_import_progress} / ${this.blockday_table_import_max}`
-              console.log( 'Running total', (this.blockday_api_import.length + this.blockday_table_error_count))
             })
             .catch(error => {
               this.blockday_table_error_count += 1
-              // this.table_failed = true
-              // this.failed_error_message = error
               if (error.response) {
                 // client received an error response (5xx, 4xx)
                 let failed_date = error.response.config.url.slice(-10)
@@ -621,21 +644,19 @@ export default {
                 this.makeToast('danger', `BlockDay Import Failed`, ('Request Error: ' + error))
                 // client never received a response, or request never left
                 this.api_busy = false
-                this.table_failed = true
                 console.log(error.request)
               } else {
                 console.log('nothing received')
                 // anything else
               }
             })
-            .finally(()=>{
+            .finally(() => {
               if (url_list.length === (this.blockday_api_import.length + this.blockday_table_error_count)) {
                 this.blockday_table = this.blockday_api_import
-                this.blockday_import_completed = true
                 this.blockday_table_busy = false
                 this.api_busy = false
               }
-        })
+            })
         )
       }
       if (url_list.length === (this.blockday_api_import.length + this.blockday_table_error_count)) {
@@ -690,6 +711,7 @@ export default {
       }
     },
     on_blockday_table_row_selected: function (items) {
+      this.api_busy = true
       if (!(items.length === 0)) {
         this.blockday_selected = true
         this.blockday_table_selection = items
@@ -697,44 +719,47 @@ export default {
         this.block_csv_data_link = `${this.$root.api_combined_address}/csv/block?date=${this.blockday_selected_date}`
         let block_list = Object.values(items)[0]['blocks']
         this.block_list_axios_importer(block_list)
-
       } else {
         this.blockday_selected = false
       }
     },
     block_list_axios_importer: function (block_list) {
       console.log('Block List Importing')
+      this.api_busy = true
       this.block_list_api_import = []
       this.block_table_busy = true
+      this.block_table_error_count = 0
       let block_list_base_url = `${this.$root.api_combined_address}/block`
       let promise_list = []
 
+      this.block_table_import_max = block_list.length
+
       for (let x in block_list) {
         let block_list_combined_url = block_list_base_url + `?hash=${block_list[x]}`
-        console.log('Block list combined url', block_list_combined_url)
         promise_list.push(limiter.schedule(() => axios.get(block_list_combined_url))
             .then((results) => {
               this.block_list_api_import.push(results['data'])
-              this.block_table_import_progress = `${this.block_list_api_import.length} / ${block_list.length}`
-              if (block_list.length === this.block_list_api_import.length) {
-                this.block_table = this.block_list_api_import
-                this.block_table_busy = false
-              }
+              this.block_table_import_progress = this.block_list_api_import.length
             })
             .catch(error => {
+              this.block_table_error_count += 1
               let status_code = error.response.status
               console.log('Block list importer error:', status_code)
-
               if (status_code === 404) {
-                this.makeToast('warning', 'Block Data Missing', error, false)
-                console.log("Data for Block missing")
+                console.log(error.response)
+                this.makeToast('warning', 'Block Data Missing', error + `\nBlock Hash: ${error.response.request.responseURL.slice(-64)} `, false)
               } else {
                 this.makeToast('danger', 'Block Data Retrieval Failure', error, false)
-                this.table_failed = "Failed"
-                this.failed_error_message = error
               }
               this.api_busy = false
               console.log('Block retrieval error:', error.response)
+            })
+            .finally(() =>{
+              if (block_list.length === this.block_list_api_import.length + this.block_table_error_count) {
+                this.block_table = this.block_list_api_import
+                this.block_table_busy = false
+                this.api_busy = false
+              }
             })
         )
       }
@@ -756,25 +781,26 @@ export default {
       this.api_busy = true
       this.transaction_table_busy = true
       let transaction_list_base_url = `${this.$root.api_combined_address}/transaction`
+      this.transaction_table_import_max = transaction_list.length
 
       for (let x in transaction_list) {
         let transaction_list_combined_url = transaction_list_base_url + `?hash=${transaction_list[x]}`
         limiter.schedule(() => axios.get(transaction_list_combined_url))
             .then((results) => {
               this.transaction_list_api_import.push(results['data'])
-              this.transaction_table_import_progress = `${this.transaction_list_api_import.length} / ${transaction_list.length}`
-
-              if (transaction_list.length === this.transaction_list_api_import.length) {
+              this.transaction_table_import_progress = this.transaction_list_api_import.length
+            })
+            .catch(error => {
+              this.api_busy = false
+              this.makeToast('danger', 'Transaction Retrieval Failure', error, false)
+              console.log(error)
+            })
+            .finally(() =>{
+              if (transaction_list.length === this.transaction_list_api_import.length + this.transaction_table_error_count) {
                 this.transaction_table = this.transaction_list_api_import
                 this.transaction_table_busy = false
                 this.api_busy = false
               }
-            })
-            .catch(error => {
-              this.api_busy = false
-              this.failed_error_message = error
-              this.makeToast('danger', 'Transaction Retrieval Failure', error, false)
-              console.log(error)
             })
       }
     },
@@ -814,24 +840,23 @@ export default {
         let currency_value = (sat_to_btc * selected_base)
         let fixed_value = 0
 
-        if (currency_value.toFixed(toFixed) > 0){
+        if (currency_value.toFixed(toFixed) > 0) {
           fixed_value = currency_value.toFixed(toFixed)
         } else {
           fixed_value = currency_value.toFixed(6)
         }
-        if (this.currency_chosen_value === 'USD'){
+        if (this.currency_chosen_value === 'USD') {
           return USD_formatter.format(fixed_value)
-        }else if (this.currency_chosen_value === 'GBP'){
-            return GBP_formatter.format(fixed_value)
-        }
-        else if (this.currency_chosen_value === 'EUR'){
+        } else if (this.currency_chosen_value === 'GBP') {
+          return GBP_formatter.format(fixed_value)
+        } else if (this.currency_chosen_value === 'EUR') {
           return EUR_formatter.format(fixed_value)
-        }
-        else if (this.currency_chosen_value === 'CNY'){
+        } else if (this.currency_chosen_value === 'CNY') {
           return CNY_formatter.format(fixed_value)
         }
       }
     },
+
 
     slice_date_string: function (input) {
       return input.slice(0, 2) + '/' + input.slice(2, 4) + '/' + input.slice(4)
