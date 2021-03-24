@@ -4,7 +4,7 @@
     <b-row>
       <b-col>
         <h1><strong>Block Explorer</strong></h1>
-        <b-alert class="warning" dismissible show>NOTE: Imports of non-cached data may be subject to rate-limiting
+        <b-alert class="warning" :dismissible="true" :show="true">NOTE: Imports of non-cached data may be subject to rate-limiting
         </b-alert>
       </b-col>
     </b-row>
@@ -114,7 +114,7 @@
     <b-container v-if="blockday_selected" class="p-3 mb-3">
     <b-row v-if="blockday_selected" class="">
       <b-col class="d-flex">
-        <h2><strong>Blocks on {{ slice_date_string(blockday_table_selection[0]['_id']) }}</strong></h2>
+        <h2><strong>Blocks on {{ blockday_table_selection[0]['_id'] }}</strong></h2>
         <b-button :disabled="block_table_busy || api_busy" :href="block_csv_data_link"
                   class="ml-auto m-2" variant="outline-secondary">
           <b-icon-download></b-icon-download>
@@ -185,9 +185,9 @@
                  :items="transaction_table"
                  :sort-by.sync="transaction_table_sort_by"
                  :sort-desc="true"
-                 bordered
+                 :bordered="true"
                  class="pl-2 pr-2"
-                 responsive
+                 :responsive="true"
                  sticky-header="85vh">
 
           <template #table-busy>
@@ -224,7 +224,7 @@
                 <b-col>
                   <h3 v-if="!row.item.coinbase_transaction">Inputs</h3>
                   <h3 v-if="row.item.coinbase_transaction">Coinbase Transaction</h3>
-                  <b-table-simple v-if="!row.item.coinbase_transaction" responsive stacked>
+                  <b-table-simple v-if="!row.item.coinbase_transaction" :responsive="true" :stacked="true">
                     <b-thead>
                       <b-tr>
                         <b-th>Inputs</b-th>
@@ -245,7 +245,7 @@
 
                 <b-col>
                   <h3>Outputs</h3>
-                  <b-table-simple responsive stacked>
+                  <b-table-simple :responsive="true" :stacked="true">
                     <b-thead>
                       <b-tr>
                         <b-th>Outputs</b-th>
@@ -376,9 +376,7 @@ export default {
       blockday_table_fields: [
 
         {
-          key: '_id', label: 'Date', sortable: true, stickyColumn: true, isRowHeader: true, formatter: value => {
-            return value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4)
-          }
+          key: '_id', label: 'Date', sortable: true, stickyColumn: true, isRowHeader: true
         },
         {key: "total_num_blocks", label: "Blocks", sortable: true},
         {
@@ -568,7 +566,7 @@ export default {
     previous_search_selection: function (selection) {
       this.from_picker_date = selection['from_date']
       this.to_picker_date = selection['to_date']
-      this.to_picker_date = selection['to_date']
+      this.to_picker_date = selection['to_date']// The first update to the from picker may cause an update to the to picker
     }
   },
   computed: {
@@ -604,7 +602,7 @@ export default {
       this.blockday_table_busy = true
 
       this.blockday_table_error_count = 0
-
+      this.blockday_table_import_progress = 0
       this.blockday_api_import = []
       this.blockday_table = []
       this.blockday_selected = false
@@ -620,9 +618,10 @@ export default {
       let to_date = new Date(this.to_picker_date)
       let working_date = new Date(from_date)
 
-      while (working_date <= to_date) {
+      while (working_date.getTime() <= to_date.getTime()) {
+        console.log(`Working Date ${working_date.getTime()}, to date ${to_date.getTime()}`)
         url_list.push(blockday_base_url + '?date=' + working_date.toISOString().slice(0, 10))
-        working_date.setDate(working_date.getDate() + 1)
+        working_date.setUTCDate(working_date.getUTCDate() + 1)
       }
       console.log('BlockDay url list: ', url_list)
       this.blockday_table_import_max = url_list.length
@@ -827,14 +826,13 @@ export default {
       } else {
         let sat_to_btc = input / 100000000
 
-        let initial_date_string = ''
+        let retrieval_date_string = ''
 
         if (this.blockday_selected) {
-          initial_date_string = this.blockday_selected_date
+          retrieval_date_string = this.blockday_selected_date
         } else {
-          initial_date_string = item._id
+          retrieval_date_string = item._id
         }
-        let retrieval_date_string = initial_date_string.slice(4) + '-' + initial_date_string.slice(2, 4) + '-' + initial_date_string.slice(0, 2)
 
         let selected_base = this.currency_data[retrieval_date_string][this.currency_chosen_value]
         let currency_value = (sat_to_btc * selected_base)
@@ -858,9 +856,9 @@ export default {
     },
 
 
-    slice_date_string: function (input) {
-      return input.slice(0, 2) + '/' + input.slice(2, 4) + '/' + input.slice(4)
-    },
+    // slice_date_string: function (input) {
+    //   return input.slice(0, 2) + '/' + input.slice(2, 4) + '/' + input.slice(4)
+    // },
     prevent_navigation: function (event) {
       if (!this.api_busy) return
       event.preventDefault()
