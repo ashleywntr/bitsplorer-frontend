@@ -45,15 +45,19 @@
               Populate Graph</b-button>
           </b-col>
         </b-row>
-        <b-row v-if="sunburst_data">
-            <label class="mt-2">Minimum Radian Display Value: {{ display_range }}</label>
-            <b-form-input id="range-2" v-model="display_range" type="range" min="0" max="0.01" step="0.00001"></b-form-input>
+        <b-row v-if="sunburst_data" class="mt-2 mb-2">
+          <b-col>
+<!--            <label class="mt-2">Minimum Radian Display Value: {{ display_range }}</label>-->
+              <b-input-group prepend="Minimum Radian Display Value"><b-form-input id="range-2" v-model="display_range" type="range" min="0" max="0.01" step="0.00001"></b-form-input>
+              <b-input-group-append><b-input-group-text :class="display_range < 0.001 ? 'text-danger' : 'text-secondary' ">{{display_range.toFixed(5)}}</b-input-group-text></b-input-group-append>
+            </b-input-group>
+          </b-col>
         </b-row>
 
       </b-col>
     </b-row>
 
-    <b-row>
+    <b-row v-if="sunburst_data">
       <b-col>
     <sunburst :data="sunburst_data" style="min-height:60vmin" :minAngleDisplayed=string_to_value(display_range)>
 
@@ -64,12 +68,11 @@
       </template>
 
       <!-- Add information to be displayed on top the graph -->
-      <nodeInfoDisplayer slot="top" slot-scope="{ nodes }" :current="nodes.mouseOver" :root="nodes.root"
-                         description="of the total transaction value took place on this day."/>
+      <nodeInfoDisplayer slot="top" slot-scope="{ nodes }" :current="nodes.mouseOver" :root="nodes.root" :description="description(nodes.mouseOver)" :show-all-number=false />
 
       <!-- Add bottom legend -->
       <breadcrumbTrail slot="legend" slot-scope="{ nodes, colorGetter, width }" :colorGetter="colorGetter"
-                       :current="nodes.mouseOver" :from="nodes.clicked" :root="nodes.root" :width="width"/>
+                       :current="current_node" :from="nodes.clicked" :root="nodes.root" :width="width"/>
     </sunburst>
       </b-col>
     </b-row>
@@ -93,6 +96,9 @@ export default {
   data() {
     return {
       sunburst_data:  null,
+
+      current_node: null,
+      total_value: 0,
 
       from_picker_date: null,
       from_picker_date_disabled: false,
@@ -128,6 +134,28 @@ export default {
     },
     string_to_value: function(string_value){
       return Number(string_value)
+    },
+    description: function (mouse_over) {
+      console.log(mouse_over)
+      let description = "null"
+      if (mouse_over) {
+        this.current_node = mouse_over
+        if (mouse_over.depth === 0) {
+          description = 'Total Value for Date Range: '
+          this.total_value = mouse_over.value
+          return description + ` ₿${(mouse_over.value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+        } else if (mouse_over.depth === 1) {
+          description = `${mouse_over.data.name} Total: `
+        } else if (mouse_over.depth === 2) {
+          description = `Block ${mouse_over.data.name} Total: `
+        }
+        let btc_value_total = (this.total_value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        description = description + ` ₿${(mouse_over.value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} / ₿${btc_value_total}`
+      }
+      return description
+    },
+    test : function (test){
+      console.log(test)
     }
   },
   computed:{

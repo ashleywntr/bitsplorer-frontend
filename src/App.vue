@@ -3,7 +3,7 @@
       <b-navbar class ="navbar navbar-light navbar-expand-md" toggleable="md" sticky>
           <b-navbar-brand>
             <router-link class="navbar-brand" to="/">
-              <strong>py-chain</strong>
+              <strong class="bitsplorer-brand">₿ITSPLOR£R</strong>
             </router-link>
             <b-nav-text>{{this.$root.app_state}}</b-nav-text>
           </b-navbar-brand>
@@ -15,7 +15,6 @@
               <b-nav-text><router-link class="nav-link" to="/BlockExplorer">Block Explorer</router-link></b-nav-text>
 <!--              <b-nav-text><router-link class="nav-link" to="/SavedSearches">Saved Searches</router-link></b-nav-text>-->
               <b-nav-text><router-link class="nav-link" to="/Settings">Settings</router-link></b-nav-text>
-              <b-nav-text><router-link class="nav-link" to="/Visualiser">Visualiser</router-link></b-nav-text>
             </b-navbar-nav>
 
             <b-navbar-nav class="ml-auto">
@@ -49,7 +48,7 @@
 <!--        <ul class="list-inline">-->
 <!--          <li class="list-inline-item"><router-link to="/">Home</router-link></li>-->
 <!--        </ul>-->
-        <div class="copyright">py-chain 2021</div>
+        <div class="copyright">Bitsplorer 2021</div>
         <div class="copyright">Historical Price Data Powered by <a href="https://www.coindesk.com/price/bitcoin">CoinDesk</a></div>
       </footer>
     </div>

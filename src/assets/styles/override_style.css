@@ -138,24 +138,8 @@ label {
   font-family: 'Prompt';
 }
 
-.btn btn-primary Submit {
-  background: rgb(204,255,0);
+.bitsplorer-brand{
+  font-family: Prompt,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
 }
 
-.btn-primary Submit {
-  color: #fff;
-  border-color: #007bff;
-  background: #ff00a8;
-}
-
-
-.submit {
-  background: #b70064;
-  max-width: 0;
-  min-width: 100%;
-}
-
-.submit:hover {
-  background: #5904a7;
-}
 

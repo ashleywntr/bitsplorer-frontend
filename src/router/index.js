@@ -28,12 +28,12 @@ const routes = [
     {
         path: '/SavedSearches',
         name: 'Saved Searches',
-        component: () => import('../components/SavedSearches.vue')
+        component: () => import('../components/Unused/SavedSearches.vue')
     },
     {
         path: '/Visualiser',
         name: 'Visualiser',
-        component: () => import('../components/Visualiser.vue')
+        component: () => import('../components/Unused/Visualiser.vue')
     },
 ]
 

@@ -3,7 +3,7 @@
     <b-row class="pt-3">
       <b-col>
         <h1><strong>Home</strong></h1>
-        <p>Welcome to py-chain! The Bitcoin Blockchain explorer.</p>
+        <p>Welcome to {{this.$root.brand_text}}! The Bitcoin Blockchain explorer.</p>
       </b-col>
     </b-row>
 
@@ -13,7 +13,7 @@
 
     <b-row v-if="disclaimer">
       <b-col>
-        <h2>Current BTC Rates</h2>
+        <h2>Current XBP Rates</h2>
         <h4>{{retrieval_time}}</h4>
       </b-col>
 
@@ -38,7 +38,7 @@ import axios from "axios"
 export default {
 name: "Home",
   mounted(){
-    document.title = "Home | py-chain"
+    document.title = this.$options.name + this.$root.title_brand
     this.price_checker()
   },
   methods:{

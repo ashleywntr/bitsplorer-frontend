@@ -16,26 +16,14 @@
 
           <b-row>
             <b-col md="auto">
-              <b-form>
-                <b-form-group id="ip_picker_fieldset"
-                              label-text-align="center"
-                              description="The Hostname or IP address for the server."
-                              label="Hostname / IP Address"
-                              label-for="address_input">
-                  <b-form-input id="address_input"
-                                v-model="this.$root.api_address">
-                  </b-form-input>
-                </b-form-group>
-                <b-form-group id="port_picker_fieldset"
-                              description="The connection port. Default: 5000."
-                              label="Port"
-                              label-for="port_input">
-
-                  <b-form-input id="port_input"
-                                v-model="this.$root.api_port">
-                  </b-form-input>
-                </b-form-group>
-              </b-form>
+                <b-input-group prepend="Hostname / IP Address" class="mb-3">
+                  <b-form-input id="address_input" v-model="this.$root.api_address"></b-form-input>
+                </b-input-group>
+            </b-col>
+            <b-col>
+              <b-input-group prepend="Port" class="mb-3">
+                <b-form-input id="port_input" v-model="this.$root.api_port"></b-form-input>
+              </b-input-group>
             </b-col>
           </b-row>
         </b-col>
@@ -47,7 +35,7 @@
 export default {
 name: "Settings",
   mounted(){
-    document.title = "Settings | py-chain"
+    document.title = this.$options.name + this.$root.title_brand
   },
 }
 

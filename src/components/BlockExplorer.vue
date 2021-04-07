@@ -18,9 +18,8 @@
           >
           </b-form-select>
           <b-input-group-append v-if="from_picker_date && to_picker_date">
-            <b-button :href=currency_csv_download_url variant="outline-secondary">
-              <b-icon-download></b-icon-download>
-              Currency Data (CSV)
+            <b-button :href=currency_csv_download_url variant="outline-secondary" class="">
+              <b-icon-download></b-icon-download> Currency Data (CSV)
             </b-button>
           </b-input-group-append>
         </b-input-group>
@@ -53,12 +52,21 @@
     </b-row>
 
     <b-row v-if="this.$cookies.get('previous_searches')" class="mt-2 mb-4">
-      <b-col>
+      <b-col xl="6">
         <b-input-group prepend="Previous Searches" size="lg">
           <b-form-select v-model="previous_search_selection"
                          :disabled="api_busy"
                          :options="previous_search_selection_options">
           </b-form-select>
+        </b-input-group>
+      </b-col>
+      <b-col xl="">
+        <b-input-group prepend="Visualisation" size="lg">
+         <b-input-group-append is-text>
+            <b-form-checkbox switch class="ml-1" v-model="show_sunburst"></b-form-checkbox>
+          </b-input-group-append>
+          <b-form-input v-if="show_sunburst" id="range-2" size="lg" v-model="display_range" type="range" min="0" max="0.01" step="0.00001"></b-form-input>
+          <b-input-group-append v-if="show_sunburst" class="text-monospace"><b-input-group-text :class="display_range < 0.001 ? 'text-danger' : 'text-secondary' ">{{Number(display_range).toFixed(5)}}</b-input-group-text></b-input-group-append>
         </b-input-group>
       </b-col>
     </b-row>
@@ -69,7 +77,7 @@
                   block class="mt-2"
                   variant="primary"
                   size="lg"
-                  @click="import_button_click">Import Data
+                  @click="import_button_click">Import Date Range
         </b-button>
       </b-col>
     </b-row>
@@ -106,6 +114,37 @@
                  sticky-header="50vh"
                  @row-selected="on_blockday_table_row_selected">
         </b-table>
+      </b-col>
+    </b-row>
+    <b-row v-if="blockday_table && !blockday_table_busy" class="mt-4">
+      <b-col>
+        <b-button :disabled="import_button_disabled || api_busy===true"
+                  block class="mt-2"
+                  variant="primary"
+                  @click="sunburst_date_range_importer">
+          Populate Graph</b-button>
+      </b-col>
+    </b-row>
+  </b-container>
+
+    <b-container v-if="sunburst_data && show_sunburst">
+    <b-row>
+      <b-col>
+        <sunburst :data="sunburst_data" style="min-height:60vmin" :minAngleDisplayed=string_to_value(display_range)>
+
+          <!-- Add behaviors -->
+          <template slot-scope="{ on, actions }">
+            <highlightOnHover v-bind="{ on, actions }"/>
+            <zoomOnClick v-bind="{ on, actions }"/>
+          </template>
+
+          <!-- Add information to be displayed on top the graph -->
+          <nodeInfoDisplayer slot="top" slot-scope="{ nodes }" :current="nodes.mouseOver" :root="nodes.root" :description="description(nodes.mouseOver)" :show-all-number=false />
+
+          <!-- Add bottom legend -->
+          <breadcrumbTrail slot="legend" slot-scope="{ nodes, colorGetter, width }" :colorGetter="colorGetter"
+                           :current="current_node" :from="nodes.clicked" :root="nodes.root" :width="width"/>
+        </sunburst>
       </b-col>
     </b-row>
   </b-container>
@@ -286,6 +325,8 @@
 
 
 <script>
+import {breadcrumbTrail, highlightOnHover, nodeInfoDisplayer, sunburst, zoomOnClick} from 'vue-d3-sunburst'
+import "vue-d3-sunburst/dist/vue-d3-sunburst.css"
 import axios from "axios"
 import Bottleneck from "bottleneck"
 
@@ -317,6 +358,13 @@ export default {
   name: "BlockExplorer",
 
   props: {
+  },
+  components: {
+    breadcrumbTrail,
+    highlightOnHover,
+    nodeInfoDisplayer,
+    sunburst,
+    zoomOnClick
   },
 
   data() {
@@ -429,6 +477,13 @@ export default {
           }
         }
       ],
+
+      sunburst_data:  null,
+      show_sunburst: false,
+
+      current_node: null,
+      total_value: 0,
+      display_range: 0.005,
 
       block_table: null,
       blockday_selected: false,
@@ -579,6 +634,7 @@ export default {
     future_transaction_import: function () {
       return (this.transaction_table_import_max - (this.transaction_table_import_progress + this.transaction_table_error_count))
     },
+
   },
 
   methods: {
@@ -589,6 +645,45 @@ export default {
         solid: true,
         noAutoHide: !auto_hide
       })
+    },
+
+    sunburst_date_range_importer: function () {
+      this.api_busy = true
+      this.sunburst_data = null
+      let url = `${this.$root.api_combined_address}/visualisation/sunburst?from=${this.from_picker_date.toString()}&to=${this.to_picker_date.toString()}`
+      console.log('Requesting visualisation data from ', url)
+      axios
+          .get(url)
+          .then(response => {
+            this.sunburst_data = response.data
+            this.api_busy = false
+          })
+          .catch(error => {
+            this.failed_error_message = error
+            console.log(error)
+          })
+    },
+    string_to_value: function(string_value){
+      return Number(string_value)
+    },
+    description: function (mouse_over) {
+      console.log(mouse_over)
+      let description = "null"
+      if (mouse_over) {
+        this.current_node = mouse_over
+        if (mouse_over.depth === 0) {
+          description = 'Total Value for Date Range: '
+          this.total_value = mouse_over.value
+          return description + ` ₿${(mouse_over.value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+        } else if (mouse_over.depth === 1) {
+          description = `${mouse_over.data.name} Total: `
+        } else if (mouse_over.depth === 2) {
+          description = `Block ${mouse_over.data.name} Total: `
+        }
+        let btc_value_total = (this.total_value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        description = description + ` ₿${(mouse_over.value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} / ₿${btc_value_total}`
+      }
+      return description
     },
 
     import_button_click: function () {
@@ -869,7 +964,7 @@ export default {
     window.addEventListener("beforeunload", this.prevent_navigation)
   },
   mounted() {
-    document.title = "Block Explorer | py-chain"
+    document.title = this.$options.name + this.$root.title_brand
     if (this.$cookies.get('previous_searches')) {
       this.history_cookies()
     }

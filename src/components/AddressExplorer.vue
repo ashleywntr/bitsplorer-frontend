@@ -312,7 +312,7 @@ export default {
     }
   },
   mounted() {
-    document.title = "Address Explorer | py-chain"
+    document.title = this.$options.name + this.$root.title_brand
     this.currency_value_retriever()
     if (this.$cookies.get('previous_address_searches')) {
       this.address_main_search_history_cookie()

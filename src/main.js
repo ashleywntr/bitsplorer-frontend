@@ -27,13 +27,19 @@ Vue.$cookies.config('7d')
 let api_address = 'py-chain.ddns.net'
 let api_port = '55397'
 
+let brand_text = "Bitsplorer"
+let brand_stylised = "₿ITSPLOR£R"
+let brand_cobmbined = `${" | "+brand_stylised}`
+
 new Vue({
     data: {
         app_state: 'Dev',
         api_combined_address: `http://${api_address}:${api_port}/api`,
         coindesk_root_url: "https://api.coindesk.com/v1/bpi",
         api_port: api_port,
-        api_address: api_address
+        api_address: api_address,
+        title_brand: brand_cobmbined,
+        brand_text: brand_text
     },
     router,
     render: h => h(App),
