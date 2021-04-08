@@ -10,11 +10,11 @@
           <b-navbar-toggle target="nav-text-collapse"></b-navbar-toggle>
           <b-collapse id="nav-text-collapse" is-nav>
             <b-navbar-nav>
-              <b-nav-text><router-link class="nav-link" to="/">Home</router-link></b-nav-text>
-              <b-nav-text><router-link class="nav-link" to="/AddressExplorer">Address Explorer</router-link></b-nav-text>
-              <b-nav-text><router-link class="nav-link" to="/BlockExplorer">Block Explorer</router-link></b-nav-text>
+              <b-nav-text><router-link class="nav-link" to="/" :class="{active: $route.name==='Home'}">Home</router-link></b-nav-text>
+              <b-nav-text><router-link class="nav-link" to="/AddressExplorer" :class="{active: $route.name==='Address Explorer'}">Address Explorer</router-link></b-nav-text>
+              <b-nav-text><router-link class="nav-link" to="/BlockExplorer" :class="{active: $route.name==='Block Explorer'}">Block Explorer</router-link></b-nav-text>
 <!--              <b-nav-text><router-link class="nav-link" to="/SavedSearches">Saved Searches</router-link></b-nav-text>-->
-              <b-nav-text><router-link class="nav-link" to="/Settings">Settings</router-link></b-nav-text>
+              <b-nav-text><router-link class="nav-link" to="/Settings" :class="{active: $route.name==='Settings'}" >Settings</router-link></b-nav-text>
             </b-navbar-nav>
 
             <b-navbar-nav class="ml-auto">

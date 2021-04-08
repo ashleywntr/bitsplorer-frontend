@@ -91,14 +91,13 @@
               </b-col>
             </b-row>
 
-
             <b-row>
               <b-col>
                 <b-row>
                   <b-table :fields="address_table_fields"
                            :items="[entry]"
                            class="pl-2 pr-2"
-                           responsive
+                           :responsive="true"
                            sticky-header="85vh">
                   </b-table>
                 </b-row>
@@ -120,9 +119,9 @@
                          :items="entry.transaction_data"
                          :sort-by.sync="transaction_table_sort_by"
                          :sort-desc="true"
-                         bordered
+                         :bordered="true"
                          class="pl-2 pr-2"
-                         responsive
+                         :responsive="true"
                          sticky-header="55vh">
 
                   <template #cell(show_details)="row">
@@ -142,7 +141,7 @@
                         <b-col>
                           <h3 v-if="!row.item.coinbase_transaction">Inputs</h3>
                           <h3 v-if="row.item.coinbase_transaction">Coinbase Transaction</h3>
-                          <b-table-simple v-if="!row.item.coinbase_transaction" responsive stacked>
+                          <b-table-simple v-if="!row.item.coinbase_transaction" :responsive="true" :stacked="true">
                             <b-thead>
                               <b-tr>
                                 <b-th>Inputs</b-th>
@@ -312,7 +311,7 @@ export default {
     }
   },
   mounted() {
-    document.title = this.$options.name + this.$root.title_brand
+    document.title = this.$route.name + this.$root.title_brand
     this.currency_value_retriever()
     if (this.$cookies.get('previous_address_searches')) {
       this.address_main_search_history_cookie()
@@ -343,7 +342,6 @@ export default {
             this.address_table_array.push(return_object)
           })
           .catch(error => {
-            this.failed_error_message = error
             this.makeToast('danger', 'Address Import Error', error)
             console.log(error)
           })

@@ -35,7 +35,7 @@
 export default {
 name: "Settings",
   mounted(){
-    document.title = this.$options.name + this.$root.title_brand
+    document.title = this.$route.name + this.$root.title_brand
   },
 }
 

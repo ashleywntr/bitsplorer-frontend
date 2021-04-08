@@ -9,7 +9,7 @@
       </b-col>
     </b-row>
 
-    <b-row class="mb-4">
+    <b-row class="mb-4"><!--Currency Picker-->
       <b-col>
         <b-input-group prepend="Currency" size="lg">
           <b-form-select v-model="currency_chosen_value"
@@ -25,8 +25,8 @@
         </b-input-group>
       </b-col>
     </b-row>
-
-    <b-row class="mt-2 "><!--Date Pickers-->
+    <!--Date Pickers-->
+    <b-row class="mt-2 ">
       <b-col class="mb-2" xl="6">
         <b-input-group prepend="From Date" size="lg">
           <b-form-datepicker id="from_date_picker_block"
@@ -51,8 +51,8 @@
       </b-col>
     </b-row>
 
-    <b-row v-if="this.$cookies.get('previous_searches')" class="mt-2 mb-4">
-      <b-col xl="6">
+    <b-row class="mt-2 mb-4">
+      <b-col xl="6" v-if="this.$cookies.get('previous_searches')" class="mb-2">
         <b-input-group prepend="Previous Searches" size="lg">
           <b-form-select v-model="previous_search_selection"
                          :disabled="api_busy"
@@ -60,7 +60,8 @@
           </b-form-select>
         </b-input-group>
       </b-col>
-      <b-col xl="">
+      <!--Visualisation Switch-->
+      <b-col xl="" class="">
         <b-input-group prepend="Visualisation" size="lg">
          <b-input-group-append is-text>
             <b-form-checkbox switch class="ml-1" v-model="show_sunburst"></b-form-checkbox>
@@ -116,18 +117,17 @@
         </b-table>
       </b-col>
     </b-row>
-    <b-row v-if="blockday_table && !blockday_table_busy" class="mt-4">
-      <b-col>
-        <b-button :disabled="import_button_disabled || api_busy===true"
-                  block class="mt-2"
-                  variant="primary"
-                  @click="sunburst_date_range_importer">
-          Populate Graph</b-button>
-      </b-col>
-    </b-row>
   </b-container>
 
-    <b-container v-if="sunburst_data && show_sunburst">
+    <b-container v-if="sunburst_data && show_sunburst" class="p-3 mb-3">
+      <b-row>
+        <b-col class="d-inline-flex">
+          <h2><strong>Block Visualisation</strong></h2>
+          <b-button class="p-2 pl-3 pr-3 ml-auto" :disabled="api_busy" @click="show_sunburst=false" variant="outline-danger">
+            X
+          </b-button>
+        </b-col>
+      </b-row>
     <b-row>
       <b-col>
         <sunburst :data="sunburst_data" style="min-height:60vmin" :minAngleDisplayed=string_to_value(display_range)>
@@ -153,7 +153,7 @@
     <b-container v-if="blockday_selected" class="p-3 mb-3">
     <b-row v-if="blockday_selected" class="">
       <b-col class="d-flex">
-        <h2><strong>Blocks on {{ blockday_table_selection[0]['_id'] }}</strong></h2>
+        <h2><strong>Blocks on {{ date_formatter(blockday_table_selection[0]['_id']) }}</strong></h2>
         <b-button :disabled="block_table_busy || api_busy" :href="block_csv_data_link"
                   class="ml-auto m-2" variant="outline-secondary">
           <b-icon-download></b-icon-download>
@@ -359,6 +359,7 @@ export default {
 
   props: {
   },
+
   components: {
     breadcrumbTrail,
     highlightOnHover,
@@ -424,11 +425,13 @@ export default {
       blockday_table_fields: [
 
         {
-          key: '_id', label: 'Date', sortable: true, stickyColumn: true, isRowHeader: true
+          key: '_id', label: 'Date', sortable: true, stickyColumn: true, isRowHeader: true, formatter: value => {
+            return new Date(value).toLocaleDateString('en-GB')
+          }
         },
         {key: "total_num_blocks", label: "Blocks", sortable: true},
         {
-          key: "total_num_tx", label: "TXs.", sortable: true, formatter: value => {
+          key: "total_num_tx", label: "TXs", sortable: true, formatter: value => {
             return value.toLocaleString('en-GB')
           }
         },
@@ -604,6 +607,7 @@ export default {
       ]
     }
   },
+
   watch: {
     from_picker_date: function (new_value) {
       console.log("From Date:", new_value)
@@ -622,8 +626,14 @@ export default {
       this.from_picker_date = selection['from_date']
       this.to_picker_date = selection['to_date']
       this.to_picker_date = selection['to_date']// The first update to the from picker may cause an update to the to picker
+    },
+    show_sunburst: function (selection){
+      if (selection && !this.sunburst_data){
+        this.sunburst_vis_import()
+      }
     }
   },
+
   computed: {
     future_blockday_import: function () {
       return (this.blockday_table_import_max - (this.blockday_table_import_progress + this.blockday_table_error_count))
@@ -647,8 +657,7 @@ export default {
       })
     },
 
-    sunburst_date_range_importer: function () {
-      this.api_busy = true
+    sunburst_vis_import: function () {
       this.sunburst_data = null
       let url = `${this.$root.api_combined_address}/visualisation/sunburst?from=${this.from_picker_date.toString()}&to=${this.to_picker_date.toString()}`
       console.log('Requesting visualisation data from ', url)
@@ -656,10 +665,9 @@ export default {
           .get(url)
           .then(response => {
             this.sunburst_data = response.data
-            this.api_busy = false
           })
           .catch(error => {
-            this.failed_error_message = error
+            this.makeToast("Danger", "Visualisation Error", error)
             console.log(error)
           })
     },
@@ -667,7 +675,6 @@ export default {
       return Number(string_value)
     },
     description: function (mouse_over) {
-      console.log(mouse_over)
       let description = "null"
       if (mouse_over) {
         this.current_node = mouse_over
@@ -689,6 +696,9 @@ export default {
     import_button_click: function () {
       this.history_cookies()
       this.blockday_axios_importer()
+      if(this.show_sunburst){
+        this.sunburst_vis_import()
+      }
 
       this.previous_search_selection = null
     },
@@ -907,14 +917,14 @@ export default {
             this.currency_data = results.data
           })
           .catch(error => {
-            console.log('Transaction Retrieval Error:', error)
+            this.makeToast('warning', 'Currency Retrieval Error', error)
           })
     },
 
     currency_formatter: function (input, key, item, toFixed = 2) {
       if (this.currency_chosen_value === 'XBP') {
         if ((input / 100000000).toFixed(2) > 0) {
-          return '₿' + ((input / 100000000).toFixed(toFixed)).toLocaleString('en-GB')
+          return '₿' + ((input / 100000000).toFixed(toFixed)).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
         } else {
           return '₿' + ((input / 100000000).toFixed(6)).toLocaleString('en-GB')
         }
@@ -950,10 +960,10 @@ export default {
       }
     },
 
+    date_formatter: function (date){
+      return new Date(date).toLocaleDateString()
+    },
 
-    // slice_date_string: function (input) {
-    //   return input.slice(0, 2) + '/' + input.slice(2, 4) + '/' + input.slice(4)
-    // },
     prevent_navigation: function (event) {
       if (!this.api_busy) return
       event.preventDefault()
@@ -964,7 +974,7 @@ export default {
     window.addEventListener("beforeunload", this.prevent_navigation)
   },
   mounted() {
-    document.title = this.$options.name + this.$root.title_brand
+    document.title = this.$route.name + this.$root.title_brand
     if (this.$cookies.get('previous_searches')) {
       this.history_cookies()
     }
