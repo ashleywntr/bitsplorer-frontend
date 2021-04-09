@@ -309,7 +309,9 @@
 
               <b-row>
                 <b-col>
-                  <span>Transaction Hash {{ row.item._id }}</span>
+                  <span>{{ new Date(row.item.time*1000).toUTCString()}}</span>
+                  <br>
+                  <span>Transaction Hash: {{ row.item._id }}</span>
                 </b-col>
               </b-row>
             </b-card>
@@ -507,8 +509,8 @@ export default {
           }
         },
         {
-          key: "time", sortable: true, formatter: value => {
-            return new Date(value * 1000).toLocaleTimeString('en-GB')
+          key: "time",label: 'Time (UTC)', sortable: true, formatter: value => {
+            return new Date(value * 1000).toLocaleTimeString('en-GB', {timeZone:'UTC'})
           }
         },
         {
