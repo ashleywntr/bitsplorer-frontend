@@ -13,7 +13,6 @@ const routes = [
         path: '/BlockExplorer',
         name: 'Block Explorer',
         component: () => import('../components/BlockExplorer.vue'),
-        meta:{title: "Block Explorer"}
     },
     {
         path: '/AddressExplorer',
