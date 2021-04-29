@@ -611,7 +611,7 @@ export default {
   },
 
   watch: {
-    from_picker_date: function (new_value) {
+    from_picker_date: function (new_value) { // Watch date picker value for updates
       console.log("From Date:", new_value)
       this.to_picker_date_min_value = new_value
       this.to_picker_date_disabled = false
@@ -629,7 +629,7 @@ export default {
       this.to_picker_date = selection['to_date']
       this.to_picker_date = selection['to_date']// The first update to the from picker may cause an update to the to picker
     },
-    show_sunburst: function (selection){
+    show_sunburst: function (selection){ // Ensure that visualisation switch is toggled and data is present
       if (selection && !this.sunburst_data){
         this.sunburst_vis_import()
       }
@@ -637,7 +637,7 @@ export default {
   },
 
   computed: {
-    future_blockday_import: function () {
+    future_blockday_import: function () { // Calculate values for progress bar
       return (this.blockday_table_import_max - (this.blockday_table_import_progress + this.blockday_table_error_count))
     },
     future_block_import: function () {
@@ -650,7 +650,7 @@ export default {
   },
 
   methods: {
-    makeToast: function (variant = null, title = null, body = null, auto_hide = true) {
+    makeToast: function (variant = null, title = null, body = null, auto_hide = true) { // Show toast notifications
       this.$bvToast.toast(`${body}`, {
         title: `${title}`,
         variant: variant,
@@ -683,7 +683,7 @@ export default {
         if (mouse_over.depth === 0) {
           description = 'Total Value for Date Range: '
           this.total_value = mouse_over.value
-          return description + ` ₿${(mouse_over.value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+          return description + ` ₿${(mouse_over.value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` // Regular Expression to comma separate long value strings
         } else if (mouse_over.depth === 1) {
           description = `${mouse_over.data.name} Total: `
         } else if (mouse_over.depth === 2) {
@@ -785,7 +785,7 @@ export default {
           to_date: this.to_picker_date,
           request_date: current_time
         })
-        let previous_searches_string = JSON.stringify(previous_searches)
+        let previous_searches_string = JSON.stringify(previous_searches) // Encode object into JSON for plaintext storage
         this.$cookies.set("previous_searches", previous_searches_string)
       }
       previous_searches.sort(function (a, b) {
@@ -936,7 +936,7 @@ export default {
         let retrieval_date_string = ''
 
         if (this.blockday_selected) {
-          retrieval_date_string = this.blockday_selected_date
+          retrieval_date_string = this.blockday_selected_date //Get the ID from
         } else {
           retrieval_date_string = item._id
         }
@@ -971,7 +971,7 @@ export default {
       event.preventDefault()
       event.returnValue = ""
     }
-  },
+  }, // prevent navigation during api access methods
   beforeMount() {
     window.addEventListener("beforeunload", this.prevent_navigation)
   },
