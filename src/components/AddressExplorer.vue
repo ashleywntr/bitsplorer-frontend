@@ -58,7 +58,7 @@
             <b-row>
               <b-col class="d-flex">
                 <div>
-                  <h4>{{entry._id}}</h4>
+                  <h4>{{ entry._id }}</h4>
                 </div>
                 <div class="ml-auto">
                   <b-button @click="address_remover(entry._id)" variant="outline-danger"><strong>X</strong></b-button>
@@ -70,16 +70,16 @@
           <b-card-body>
             <b-row v-if="entry.abuse_count">
               <b-col>
-                <b-alert dismissible show variant="danger">BitcoinAbuse: Malicious Activity Identified for this address
+                <b-alert dismissible :show="true" variant="danger">BitcoinAbuse: Malicious Activity Identified for this address
                   <a :href="'https://www.bitcoinabuse.com/reports/'+entry._id" target="_blank">
-                    ({{ entry.abuse_count > 1 ? entry.abuse_count + ' instances' : entry.abuse_count + ' instance'}})</a>
+                    ({{ entry.abuse_count > 1 ? entry.abuse_count + ' instances' : entry.abuse_count + ' instance' }})</a>
                 </b-alert>
               </b-col>
             </b-row>
 
             <b-row v-if="!entry.abuse_count">
               <b-col>
-                <b-alert dismissible show variant="success">BitcoinAbuse: No Malicious Activity Identified for this
+                <b-alert dismissible :show="true" variant="success">BitcoinAbuse: No Malicious Activity Identified for this
                   address
                 </b-alert>
               </b-col>
@@ -87,7 +87,7 @@
 
             <b-row v-if="!entry.abuse_check">
               <b-col>
-                <b-alert dismissable show variant="warning">Failed to retrieve abuse report</b-alert>
+                <b-alert dismissable :show="true" variant="warning">Failed to retrieve abuse report</b-alert>
               </b-col>
             </b-row>
 
@@ -177,7 +177,9 @@
                               <b-tr v-for="output in row.item.out" :key="output.addr">
                                 <b-td stacked-heading="Value" v-text="currency_formatter(output.value)"></b-td>
                                 <b-td stacked-heading="Address">
-                                  <a :href="'#'+output.addr" @click="address_populator(output.addr)">{{output.addr }}</a></b-td>
+                                  <a :href="'#'+output.addr" @click="address_populator(output.addr)">{{
+                                      output.addr
+                                    }}</a></b-td>
                                 <b-td stacked-heading="Spent">{{ output.spent }}</b-td>
                                 <b-td stacked-heading="Output Order">{{ output.n }}</b-td>
                               </b-tr>
@@ -393,7 +395,7 @@ export default {
       console.log("Retrieving Tx for ", address)
       this.transaction_table_importer(address)
     },
-    address_remover: function(address){
+    address_remover: function (address) {
       this.address_table_array.forEach((entry, index) => {
         if (entry._id === address) {
           this.$delete(this.address_table_array, index)
