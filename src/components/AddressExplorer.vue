@@ -131,6 +131,7 @@
                       <b-row>
                         <b-col>
                           <h3>Transaction Details</h3>
+                          {{console.log('Whole row', row)}}
                         </b-col>
                       </b-row>
                       <b-row>
@@ -158,7 +159,7 @@
 
                         <b-col>
                           <h3>Outputs</h3>
-                          <b-table-simple responsive stacked>
+                          <b-table-simple :responsive="true" :stacked="true">
                             <b-thead>
                               <b-tr>
                                 <b-th>Outputs</b-th>
@@ -373,8 +374,8 @@ export default {
     },
 
     address_populator: function (address) {
+      if(address){
       this.address_entry = null
-      console.log(address)
       let allow_import = true
       this.address_table_array.forEach((entry) => {
         if (entry._id === address) {
@@ -385,6 +386,9 @@ export default {
       })
       if (allow_import) {
         this.address_importer(address)
+      }
+      } else{
+        this.makeToast('info', 'Invalid Input', 'Please input address to be imported.')
       }
     },
     transaction_populator: function (address) {
