@@ -35,6 +35,11 @@ const routes = [
         name: 'Visualiser',
         component: () => import('../components/Unused/Visualiser.vue')
     },
+    {
+        path: '*',
+        name: 'Page not Found',
+        component: () => import('../components/404Route'),
+    },
 ]
 
 const router = new VueRouter({
