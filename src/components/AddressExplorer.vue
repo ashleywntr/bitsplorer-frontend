@@ -54,15 +54,11 @@
       <b-col v-for="entry in address_table_array" :key="entry._id">
         <b-card :key="entry._id" :id="entry._id">
 
-          <template #header class="mb-0">
+          <template #header class="">
             <b-row>
               <b-col class="d-flex">
-                <div>
                   <h4>{{ entry._id }}</h4>
-                </div>
-                <div class="ml-auto">
-                  <b-button @click="address_remover(entry._id)" variant="outline-danger"><strong>X</strong></b-button>
-                </div>
+                  <b-button @click="address_remover(entry._id)" variant="outline-danger" class="ml-auto"><strong>X</strong></b-button>
               </b-col>
             </b-row>
           </template>
@@ -329,7 +325,7 @@ export default {
       })
     },
     address_importer: function (address) {
-      this.address_main_search_history_cookie()
+      this.address_main_search_history_cookie(address)
       let url = `${this.$root.api_combined_address}/address?hash=${address}`
       console.log("Retrieving Extra Address Data from", url)
       let return_object = {}
@@ -403,7 +399,8 @@ export default {
       })
     },
 
-    address_main_search_history_cookie() {
+    address_main_search_history_cookie(address) {
+      console.log('History cookie called')
       let previous_address_searches = []
       let current_time = new Date()
 
@@ -411,14 +408,12 @@ export default {
         console.log('Address Explorer retrieving searches from cookie')
         previous_address_searches = JSON.parse(this.$cookies.get('previous_address_searches'))
       }
-      if (this.address_entry) {
-        previous_address_searches.push({
-          address: this.address_entry,
-          request_date: current_time
-        })
-        let previous_address_searches_string = JSON.stringify(previous_address_searches)
-        this.$cookies.set("previous_address_searches", previous_address_searches_string)
-      }
+      previous_address_searches.push({
+        address: address,
+        request_date: current_time
+      })
+      let previous_address_searches_string = JSON.stringify(previous_address_searches)
+      this.$cookies.set("previous_address_searches", previous_address_searches_string)
       previous_address_searches.sort(function (a, b) {
         return new Date(b['request_date']) - new Date(a['request_date'])
       })
