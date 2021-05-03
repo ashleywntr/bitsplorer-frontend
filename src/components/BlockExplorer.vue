@@ -1,172 +1,196 @@
 <template>
   <div>
-  <b-container class="p-3 mb-3">
-    <b-row>
-      <b-col>
-        <h1><strong>Block Explorer</strong></h1>
-        <b-alert class="warning" :dismissible="true" :show="true">NOTE: Imports of non-cached data may be subject to rate-limiting
-        </b-alert>
-      </b-col>
-    </b-row>
+    <b-container class="p-3 mb-3">
+      <b-row>
+        <b-col>
+          <h1><strong>Block Explorer</strong></h1>
+          <b-alert class="warning" :dismissible="true" :show="true">NOTE: Imports of non-cached data may be subject to
+            rate-limiting
+          </b-alert>
+        </b-col>
+      </b-row>
 
-    <b-row class="mb-4"><!--Currency Picker-->
-      <b-col>
-        <b-input-group prepend="Currency" size="lg">
-          <b-form-select v-model="currency_chosen_value"
-                         :disabled="api_busy"
-                         :options="currency_options"
-          >
-          </b-form-select>
-          <b-input-group-append v-if="from_picker_date && to_picker_date">
-            <b-button :href=currency_csv_download_url variant="outline-secondary" class="">
-              <b-icon-download></b-icon-download> Currency Data (CSV)
-            </b-button>
-          </b-input-group-append>
-        </b-input-group>
-      </b-col>
-    </b-row>
-    <!--Date Pickers-->
-    <b-row class="mt-2 ">
-      <b-col class="mb-2" xl="6">
-        <b-input-group prepend="From Date" size="lg">
-          <b-form-datepicker id="from_date_picker_block"
-                             v-model="from_picker_date"
-                             :disabled="from_picker_date_disabled || api_busy===true"
-                             :max="from_picker_date_max_value"
-                             :min="from_picker_date_min_value"
-                             placeholder="Select Date">
-          </b-form-datepicker>
-        </b-input-group>
-      </b-col>
-      <b-col xl="">
-        <b-input-group prepend="To Date" size="lg">
-          <b-form-datepicker id="to_date_picker_block"
-                             v-model="to_picker_date"
-                             :disabled="to_picker_date_disabled || api_busy===true"
-                             :max="to_picker_date_max_value"
-                             :min="to_picker_date_min_value"
-                             placeholder="Select Date">
-          </b-form-datepicker>
-        </b-input-group>
-      </b-col>
-    </b-row>
+      <b-row class="mb-4"><!--Currency Picker-->
+        <b-col>
+          <b-input-group prepend="Currency" size="lg">
+            <b-form-select v-model="currency_chosen_value"
+                           :disabled="api_busy"
+                           :options="currency_options"
+            >
+            </b-form-select>
+            <b-input-group-append v-if="from_picker_date && to_picker_date">
+              <b-button :href=currency_csv_download_url variant="outline-secondary" class="">
+                <b-icon-download></b-icon-download>
+                Currency Data (CSV)
+              </b-button>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+      </b-row>
+      <!--Date Pickers-->
+      <b-row class="mt-2 ">
+        <b-col class="mb-2" xl="6">
+          <b-input-group prepend="From Date" size="lg">
+            <b-form-datepicker id="from_date_picker_block"
+                               v-model="from_picker_date"
+                               :disabled="from_picker_date_disabled || api_busy===true"
+                               :max="from_picker_date_max_value"
+                               :min="from_picker_date_min_value"
+                               placeholder="Select Date">
+            </b-form-datepicker>
+          </b-input-group>
+        </b-col>
+        <b-col xl="">
+          <b-input-group prepend="To Date" size="lg">
+            <b-form-datepicker id="to_date_picker_block"
+                               v-model="to_picker_date"
+                               :disabled="to_picker_date_disabled || api_busy===true"
+                               :max="to_picker_date_max_value"
+                               :min="to_picker_date_min_value"
+                               placeholder="Select Date">
+            </b-form-datepicker>
+          </b-input-group>
+        </b-col>
+      </b-row>
 
-    <b-row class="mt-2 mb-4">
-      <b-col xl="6" v-if="this.$cookies.get('previous_searches')" class="mb-2">
-        <b-input-group prepend="Previous Searches" size="lg">
-          <b-form-select v-model="previous_search_selection"
-                         :disabled="api_busy"
-                         :options="previous_search_selection_options">
-          </b-form-select>
-        </b-input-group>
-      </b-col>
-      <!--Visualisation Switch-->
-      <b-col xl="" class="">
-        <b-input-group prepend="Visualisation" size="lg">
-         <b-input-group-append is-text>
-            <b-form-checkbox switch class="ml-1" v-model="show_sunburst"></b-form-checkbox>
-          </b-input-group-append>
-          <b-form-input v-if="show_sunburst" id="range-2" size="lg" v-model="display_range" type="range" min="0" max="0.01" step="0.00001"></b-form-input>
-          <b-input-group-append v-if="show_sunburst" class="text-monospace"><b-input-group-text :class="display_range < 0.001 ? 'text-danger' : 'text-secondary' ">{{Number(display_range).toFixed(5)}}</b-input-group-text></b-input-group-append>
-        </b-input-group>
-      </b-col>
-    </b-row>
+      <b-row class="mt-2 mb-4">
+        <b-col xl="6" v-if="this.$cookies.get('previous_searches')" class="mb-2">
+          <b-input-group prepend="Previous Searches" size="lg">
+            <b-form-select v-model="previous_search_selection"
+                           :disabled="api_busy"
+                           :options="previous_search_selection_options">
+            </b-form-select>
+          </b-input-group>
+        </b-col>
+        <!--Visualisation Switch-->
+        <b-col xl="" class="">
+          <b-input-group prepend="Visualisation" size="lg">
+            <b-input-group-append is-text>
+              <b-form-checkbox switch class="ml-1" v-model="show_sunburst"></b-form-checkbox>
+            </b-input-group-append>
+            <b-form-input v-if="show_sunburst" id="range-2" size="lg" v-model="display_range" type="range" min="0"
+                          max="0.01" step="0.00001"></b-form-input>
+            <b-input-group-append v-if="show_sunburst" class="text-monospace">
+              <b-input-group-text :class="display_range < 0.001 ? 'text-danger' : 'text-secondary' ">
+                {{ Number(display_range).toFixed(5) }}
+              </b-input-group-text>
+            </b-input-group-append>
+          </b-input-group>
+        </b-col>
+      </b-row>
 
-    <b-row class="mb-2">
-      <b-col>
-        <b-button :disabled="import_button_disabled || api_busy===true"
-                  block class="mt-2"
-                  variant="primary"
-                  size="lg"
-                  @click="import_button_click">Import Date Range
-        </b-button>
-      </b-col>
-    </b-row>
+      <b-row class="mb-2">
+        <b-col>
+          <b-button :disabled="import_button_disabled || api_busy===true"
+                    block class="mt-2"
+                    variant="primary"
+                    size="lg"
+                    @click="import_button_click">Import Date Range
+          </b-button>
+        </b-col>
+      </b-row>
 
-    <b-row v-if="api_busy && !blockday_selected">
-      <b-col>
+      <b-row v-if="api_busy && !blockday_selected">
+        <b-col>
       <span>
         <b-progress :max="blockday_table_import_max" class="mb-3" height="2rem" show-value>
-          <b-progress-bar :label="`${(blockday_table_import_progress)} RETRIEVED`" :value="blockday_table_import_progress"
-                          variant="info"></b-progress-bar>
-          <b-progress-bar :label="`${(blockday_table_error_count)} / ${(blockday_table_import_max)} FAILED`" :value="blockday_table_error_count"
+          <b-progress-bar :label="`${(blockday_table_import_progress)} RETRIEVED`"
+                          :value="blockday_table_import_progress"
+                          variant="success"></b-progress-bar>
+          <b-progress-bar :label="`${(blockday_table_error_count)} / ${(blockday_table_import_max)} FAILED`"
+                          :value="blockday_table_error_count"
                           variant="danger"></b-progress-bar>
+          <b-progress-bar :label="`${(blockday_table_skip_count)} / ${(blockday_table_import_max)} SKIPPED`"
+                          :value="blockday_table_skip_count"
+                          variant="info"></b-progress-bar>
           <b-progress-bar :label="`${(future_blockday_import)} PENDING`" :value="future_blockday_import"
                           animated variant="warning"></b-progress-bar>
         </b-progress>
       </span>
-      </b-col>
-    </b-row>
+        </b-col>
+      </b-row>
 
-    <!--BlockDay Table-->
-    <b-row v-if="blockday_table && !blockday_table_busy" class="mt-4">
-      <b-col>
-        <b-table :busy="blockday_table_busy"
-                 :fields="blockday_table_fields"
-                 :items="blockday_table"
-                 :sort-by.sync="blockday_table_sort_by"
-                 bordered
-                 class=""
-                 :hover="!api_busy"
-                 :responsive="true"
-                 select-mode="single"
-                 :selectable="!api_busy"
-                 selected-variant="primary"
-                 sticky-header="50vh"
-                 @row-selected="on_blockday_table_row_selected">
-        </b-table>
-      </b-col>
-    </b-row>
-  </b-container>
+      <!--BlockDay Table-->
+      <b-row v-if="blockday_table && !blockday_table_busy" class="mt-4">
+        <b-col>
+          <b-table :busy="blockday_table_busy"
+                   :fields="blockday_table_fields"
+                   :items="blockday_table"
+                   :sort-by.sync="blockday_table_sort_by"
+                   bordered
+                   class=""
+                   :hover="!api_busy"
+                   :responsive="true"
+                   select-mode="single"
+                   :selectable="!api_busy"
+                   selected-variant="primary"
+                   sticky-header="50vh"
+                   @row-selected="on_blockday_table_row_selected">
+          </b-table>
+        </b-col>
+      </b-row>
+    </b-container>
+
+    <b-container v-if="!sunburst_data && show_sunburst" class="p-3 mb-3">
+      <b-row>
+        <b-col class="text-center">
+          <b-spinner type="grow" variant="info"></b-spinner>
+          <h4>Block Visualisation Loading</h4>
+        </b-col>
+      </b-row>
+    </b-container>
 
     <b-container v-if="sunburst_data && show_sunburst" class="p-3 mb-3">
       <b-row>
         <b-col class="d-inline-flex">
           <h2><strong>Block Visualisation</strong></h2>
-          <b-button class="p-2 pl-3 pr-3 ml-auto" :disabled="api_busy" @click="show_sunburst=false" variant="outline-danger">
+          <b-button class="p-2 pl-3 pr-3 ml-auto" :disabled="api_busy" @click="show_sunburst=false"
+                    variant="outline-danger">
             X
           </b-button>
         </b-col>
       </b-row>
-    <b-row>
-      <b-col>
-        <sunburst :data="sunburst_data" style="min-height:60vmin" :minAngleDisplayed=string_to_value(display_range)>
+      <b-row>
+        <b-col>
+          <sunburst :data="sunburst_data" style="min-height:60vmin" :minAngleDisplayed=string_to_value(display_range)>
 
-          <!-- Add behaviors -->
-          <template slot-scope="{ on, actions }">
-            <highlightOnHover v-bind="{ on, actions }"/>
-            <zoomOnClick v-bind="{ on, actions }"/>
-          </template>
+            <!-- Add behaviors -->
+            <template slot-scope="{ on, actions }">
+              <highlightOnHover v-bind="{ on, actions }"/>
+              <zoomOnClick v-bind="{ on, actions }"/>
+            </template>
 
-          <!-- Add information to be displayed on top the graph -->
-          <nodeInfoDisplayer slot="top" slot-scope="{ nodes }" :current="nodes.mouseOver" :root="nodes.root" :description="description(nodes.mouseOver)" :show-all-number=false />
+            <!-- Add information to be displayed on top the graph -->
+            <nodeInfoDisplayer slot="top" slot-scope="{ nodes }" :current="nodes.mouseOver" :root="nodes.root"
+                               :description="description(nodes.mouseOver)" :show-all-number='false'/>
 
-          <!-- Add bottom legend -->
-          <breadcrumbTrail slot="legend" slot-scope="{ nodes, colorGetter, width }" :colorGetter="colorGetter"
-                           :current="current_node" :from="nodes.clicked" :root="nodes.root" :width="width"/>
-        </sunburst>
-      </b-col>
-    </b-row>
-  </b-container>
+            <!-- Add bottom legend -->
+            <breadcrumbTrail slot="legend" slot-scope="{ nodes, colorGetter, width }" :colorGetter="colorGetter"
+                             :current="current_node" :from="nodes.clicked" :root="nodes.root" :width="width"/>
+          </sunburst>
+        </b-col>
+      </b-row>
+    </b-container>
 
     <!--Block Table-->
     <b-container v-if="blockday_selected" class="p-3 mb-3">
-    <b-row v-if="blockday_selected" class="">
-      <b-col class="d-flex">
-        <h2><strong>Blocks on {{ date_formatter(blockday_table_selection[0]['_id']) }}</strong></h2>
-        <b-button :disabled="block_table_busy || api_busy" :href="block_csv_data_link"
-                  class="ml-auto m-2" variant="outline-secondary">
-          <b-icon-download></b-icon-download>
-          Block Data (CSV)
-        </b-button>
-        <b-button class="m-2" :disabled="api_busy" @click="blockday_selected = false; block_selected = false" variant="outline-danger">
-          X
-        </b-button>
-      </b-col>
-    </b-row>
+      <b-row v-if="blockday_selected" class="">
+        <b-col class="d-flex">
+          <h2><strong>Blocks on {{ date_formatter(blockday_table_selection[0]['_id']) }}</strong></h2>
+          <b-button :disabled="block_table_busy || api_busy" :href="block_csv_data_link"
+                    class="ml-auto m-2" variant="outline-secondary">
+            <b-icon-download></b-icon-download>
+            Block Data (CSV)
+          </b-button>
+          <b-button class="m-2" :disabled="api_busy" @click="blockday_selected = false; block_selected = false"
+                    variant="outline-danger">
+            X
+          </b-button>
+        </b-col>
+      </b-row>
 
-    <b-row v-if="blockday_selected" class="mb-2">
-      <b-col class="">
+      <b-row v-if="blockday_selected" class="mb-2">
+        <b-col class="">
           <b-table :busy="block_table_busy"
                    :fields="block_table_fields"
                    :items="block_table"
@@ -185,9 +209,11 @@
                 <b-col>
                   <span>
                     <b-progress :max="block_table_import_max" class="mb-3" height="2rem" show-value>
-                      <b-progress-bar :label="`${(block_table_import_progress)} RETRIEVED`" :value="block_table_import_progress"
+                      <b-progress-bar :label="`${(block_table_import_progress)} RETRIEVED`"
+                                      :value="block_table_import_progress"
                                       variant="info"></b-progress-bar>
-                      <b-progress-bar :label="`${(block_table_error_count)} / ${(block_table_import_max)} FAILED`" :value="block_table_error_count"
+                      <b-progress-bar :label="`${(block_table_error_count)} / ${(block_table_import_max)} FAILED`"
+                                      :value="block_table_error_count"
                                       variant="danger"></b-progress-bar>
                       <b-progress-bar :label="`${(future_block_import)} PENDING`" :value="future_block_import"
                                       animated variant="warning"></b-progress-bar>
@@ -197,131 +223,134 @@
               </b-row>
             </template>
           </b-table>
-      </b-col>
-    </b-row>
+        </b-col>
+      </b-row>
     </b-container>
 
     <!--Transaction Table-->
-  <b-container v-if="blockday_selected && block_selected" class="p-3 mb-3">
-    <b-row v-if="blockday_selected && block_selected" class="mb-2">
-      <b-col class="d-flex ">
-        <h2><strong>Transactions for Block {{ block_table_selection[0]['height'] }}</strong></h2>
-        <b-button :disabled="transaction_table_busy || api_busy" :href="transaction_csv_data_link" class="ml-auto m-2"
-                  hover variant="outline-secondary">
-          <b-icon-download></b-icon-download>
-          Transaction Data (CSV)
-        </b-button>
-        <b-button class="m-2" :disabled="api_busy" @click="block_selected = false" variant="outline-danger">
-          X
-        </b-button>
-      </b-col>
-    </b-row>
+    <b-container v-if="blockday_selected && block_selected" class="p-3 mb-3">
+      <b-row v-if="blockday_selected && block_selected" class="mb-2">
+        <b-col class="d-flex ">
+          <h2><strong>Transactions for Block {{ block_table_selection[0]['height'] }}</strong></h2>
+          <b-button :disabled="transaction_table_busy || api_busy" :href="transaction_csv_data_link" class="ml-auto m-2"
+                    hover variant="outline-secondary">
+            <b-icon-download></b-icon-download>
+            Transaction Data (CSV)
+          </b-button>
+          <b-button class="m-2" :disabled="api_busy" @click="block_selected = false" variant="outline-danger">
+            X
+          </b-button>
+        </b-col>
+      </b-row>
 
-    <b-row v-if="blockday_selected && block_selected">
-      <b-col>
-        <b-table :busy="transaction_table_busy"
-                 :fields="transaction_table_fields"
-                 :items="transaction_table"
-                 :sort-by.sync="transaction_table_sort_by"
-                 :sort-desc="true"
-                 :bordered="true"
-                 class="pl-2 pr-2"
-                 :responsive="true"
-                 sticky-header="85vh">
+      <!--    Transaction Table-->
+      <b-row v-if="blockday_selected && block_selected">
+        <b-col>
+          <b-table :busy="transaction_table_busy"
+                   :fields="transaction_table_fields"
+                   :items="transaction_table"
+                   :sort-by.sync="transaction_table_sort_by"
+                   :sort-desc="true"
+                   :bordered="true"
+                   class="pl-2 pr-2"
+                   :responsive="true"
+                   sticky-header="85vh">
 
-          <template #table-busy>
-            <b-row>
-              <b-col>
+            <template #table-busy>
+              <b-row>
+                <b-col>
                   <span>
                     <b-progress :max="transaction_table_import_max" class="mb-3" height="2rem" show-value>
-                      <b-progress-bar :label="`${(transaction_table_import_progress)} RETRIEVED`" :value="transaction_table_import_progress"
+                      <b-progress-bar :label="`${(transaction_table_import_progress)} RETRIEVED`"
+                                      :value="transaction_table_import_progress"
                                       variant="info"></b-progress-bar>
-                      <b-progress-bar :label="`${(transaction_table_error_count)} / ${(transaction_table_import_max)} FAILED`" :value="transaction_table_error_count"
-                                      variant="danger"></b-progress-bar>
-                      <b-progress-bar :label="`${(future_transaction_import)} PENDING`" :value="future_transaction_import"
+                      <b-progress-bar
+                          :label="`${(transaction_table_error_count)} / ${(transaction_table_import_max)} FAILED`"
+                          :value="transaction_table_error_count"
+                          variant="danger"></b-progress-bar>
+                      <b-progress-bar :label="`${(future_transaction_import)} PENDING`"
+                                      :value="future_transaction_import"
                                       animated variant="warning"></b-progress-bar>
                     </b-progress>
                   </span>
-              </b-col>
-            </b-row>
-          </template>
+                </b-col>
+              </b-row>
+            </template>
 
-          <template #cell(show_details)="row">
-            <b-button block class="mr-2" size="sm" @click="row.toggleDetails">
-              {{ row.detailsShowing ? 'Hide' : 'Show' }} Details
-            </b-button>
-          </template>
+            <template #cell(show_details)="row">
+              <b-button block class="mr-2" size="sm" @click="row.toggleDetails">
+                {{ row.detailsShowing ? 'Hide' : 'Show' }} Details
+              </b-button>
+            </template>
 
-          <template #row-details="row">
-            <b-card>
-              <b-row>
-                <b-col>
+            <template #row-details="row">
+              <b-card>
+                <b-card-header>
                   <h3>Transaction Details</h3>
-                </b-col>
-              </b-row>
-              <b-row>
-                <b-col>
-                  <h3 v-if="!row.item.coinbase_transaction">Inputs</h3>
-                  <h3 v-if="row.item.coinbase_transaction">Coinbase Transaction</h3>
-                  <b-table-simple v-if="!row.item.coinbase_transaction" :responsive="true" :stacked="true">
-                    <b-thead>
-                      <b-tr>
-                        <b-th>Inputs</b-th>
-                      </b-tr>
-                      <b-tr>
-                        <b-th>Address</b-th>
-                        <b-th>Value</b-th>
-                      </b-tr>
-                    </b-thead>
-                    <b-tbody>
-                      <b-tr v-for="input in row.item.inputs" :key="input.prev_out.addr">
-                        <b-td stacked-heading="Value" v-text="currency_formatter(input.prev_out.value)"></b-td>
-                        <b-td stacked-heading="Address">{{ input.prev_out.addr }}</b-td>
-                      </b-tr>
-                    </b-tbody>
-                  </b-table-simple>
-                </b-col>
+                </b-card-header>
 
-                <b-col>
-                  <h3>Outputs</h3>
-                  <b-table-simple :responsive="true" :stacked="true">
-                    <b-thead>
-                      <b-tr>
-                        <b-th>Outputs</b-th>
-                      </b-tr>
-                      <b-tr>
-                        <b-th>Address</b-th>
-                        <b-th>Value</b-th>
-                        <b-th>Output Order</b-th>
-                      </b-tr>
-                    </b-thead>
-                    <b-tbody>
-                      <b-tr v-for="output in row.item.out" :key="output.addr">
-                        <b-td stacked-heading="Value" v-text="currency_formatter(output.value)"></b-td>
-                        <b-td stacked-heading="Address">{{ output.addr }}</b-td>
-                        <b-td stacked-heading="Spent">{{ output.spent }}</b-td>
-                        <b-td stacked-heading="Output Order">{{ output.n }}</b-td>
-                      </b-tr>
-                    </b-tbody>
-                  </b-table-simple>
-                </b-col>
-              </b-row>
+                <b-card-body style="max-height: 20vh;overflow-y: scroll;">
+                  <b-row>
+                    <b-col>
+                      <h3 v-if="!row.item.coinbase_transaction">Inputs</h3>
+                      <h3 v-if="row.item.coinbase_transaction">Coinbase Transaction</h3>
+                      <b-table-simple v-if="!row.item.coinbase_transaction" :responsive="true" :stacked="true"
+                                      sticky-header="true">
+                        <b-thead>
+                          <b-tr>
+                            <b-th>Inputs</b-th>
+                          </b-tr>
+                          <b-tr>
+                            <b-th>Address</b-th>
+                            <b-th>Value</b-th>
+                          </b-tr>
+                        </b-thead>
+                        <b-tbody>
+                          <b-tr v-for="input in row.item.inputs" :key="input.prev_out.addr">
+                            <b-td stacked-heading="Value" v-text="currency_formatter(input.prev_out.value)"></b-td>
+                            <b-td stacked-heading="Address">{{ input.prev_out.addr }}</b-td>
+                          </b-tr>
+                        </b-tbody>
+                      </b-table-simple>
+                    </b-col>
+                    <b-col>
+                      <h3>Outputs</h3>
+                      <b-table-simple :responsive="true" :stacked="true">
+                        <b-thead>
+                          <b-tr>
+                            <b-th>Outputs</b-th>
+                          </b-tr>
+                          <b-tr>
+                            <b-th>Address</b-th>
+                            <b-th>Value</b-th>
+                            <b-th>Output Order</b-th>
+                          </b-tr>
+                        </b-thead>
+                        <b-tbody>
+                          <b-tr v-for="output in row.item.out" :key="output.addr">
+                            <b-td stacked-heading="Value" v-text="currency_formatter(output.value)"></b-td>
+                            <b-td stacked-heading="Address">{{ output.addr }}</b-td>
+                            <b-td stacked-heading="Spent">{{ output.spent }}</b-td>
+                            <b-td stacked-heading="Output Order">{{ output.n }}</b-td>
+                          </b-tr>
+                        </b-tbody>
+                      </b-table-simple>
+                    </b-col>
+                  </b-row>
+                </b-card-body>
+                <b-card-footer>
+                    <span>{{ new Date(row.item.time * 1000).toUTCString() }}</span>
+                    <br>
+                    <span>Transaction Hash: {{ row.item._id }}</span>
+                </b-card-footer>
+              </b-card>
+            </template>
 
-              <b-row>
-                <b-col>
-                  <span>{{ new Date(row.item.time*1000).toUTCString()}}</span>
-                  <br>
-                  <span>Transaction Hash: {{ row.item._id }}</span>
-                </b-col>
-              </b-row>
-            </b-card>
-          </template>
+          </b-table>
+        </b-col>
+      </b-row>
 
-        </b-table>
-      </b-col>
-    </b-row>
-
-  </b-container>
+    </b-container>
   </div>
 </template>
 
@@ -356,11 +385,17 @@ const limiter = new Bottleneck({
   minTime: 20
 })
 
+limiter.on("error", function (error) {
+  console.log('Limiter Error', error)
+})
+limiter.on("failed", function (error, info) {
+  console.log(error, info)
+})
+
 export default {
   name: "BlockExplorer",
 
-  props: {
-  },
+  props: {},
 
   components: {
     breadcrumbTrail,
@@ -418,6 +453,7 @@ export default {
       blockday_table_import_progress: 0,
       blockday_table_import_max: null,
       blockday_table_error_count: 0,
+      blockday_table_skip_count: 0,
       blockday_table_completed: false,
 
       blockday_table: null,
@@ -483,7 +519,7 @@ export default {
         }
       ],
 
-      sunburst_data:  null,
+      sunburst_data: null,
       show_sunburst: false,
 
       current_node: null,
@@ -509,8 +545,8 @@ export default {
           }
         },
         {
-          key: "time",label: 'Time (UTC)', sortable: true, formatter: value => {
-            return new Date(value * 1000).toLocaleTimeString('en-GB', {timeZone:'UTC'})
+          key: "time", label: 'Time (UTC)', sortable: true, formatter: value => {
+            return new Date(value * 1000).toLocaleTimeString('en-GB', {timeZone: 'UTC'})
           }
         },
         {
@@ -629,8 +665,8 @@ export default {
       this.to_picker_date = selection['to_date']
       this.to_picker_date = selection['to_date']// The first update to the from picker may cause an update to the to picker
     },
-    show_sunburst: function (selection){ // Ensure that visualisation switch is toggled and data is present
-      if (selection && !this.sunburst_data){
+    show_sunburst: function (selection) { // Ensure that visualisation switch is toggled and data is present
+      if (selection && !this.sunburst_data) {
         this.sunburst_vis_import()
       }
     }
@@ -673,7 +709,7 @@ export default {
             console.log(error)
           })
     },
-    string_to_value: function(string_value){
+    string_to_value: function (string_value) {
       return Number(string_value)
     },
     description: function (mouse_over) {
@@ -698,12 +734,14 @@ export default {
     import_button_click: function () {
       this.history_cookies()
       this.blockday_axios_importer()
-      if(this.show_sunburst){
+      if (this.show_sunburst) {
         this.sunburst_vis_import()
       }
 
       this.previous_search_selection = null
     },
+
+
     blockday_axios_importer: function () {
       this.api_busy = true
       this.blockday_table_busy = true
@@ -717,7 +755,6 @@ export default {
 
       let blockday_base_url = `${this.$root.api_combined_address}/blockdays`
 
-      let promise_list = []
       let url_list = []
 
 
@@ -734,7 +771,7 @@ export default {
       this.blockday_table_import_max = url_list.length
 
       for (let x in url_list) {
-        promise_list.push(limiter.schedule(() => axios.get(url_list[x]))
+        limiter.schedule(() => axios.get(url_list[x])
             .then((results) => {
               this.blockday_api_import.push(results['data'])
               this.blockday_table_import_progress = this.blockday_api_import.length
@@ -752,7 +789,7 @@ export default {
                 this.api_busy = false
                 console.log(error.request)
               } else {
-                console.log('nothing received')
+                console.log('Uncaught error', error)
                 // anything else
               }
             })
@@ -836,13 +873,12 @@ export default {
       this.block_table_busy = true
       this.block_table_error_count = 0
       let block_list_base_url = `${this.$root.api_combined_address}/block`
-      let promise_list = []
 
       this.block_table_import_max = block_list.length
 
       for (let x in block_list) {
         let block_list_combined_url = block_list_base_url + `?hash=${block_list[x]}`
-        promise_list.push(limiter.schedule(() => axios.get(block_list_combined_url))
+        limiter.schedule(() => axios.get(block_list_combined_url)
             .then((results) => {
               this.block_list_api_import.push(results['data'])
               this.block_table_import_progress = this.block_list_api_import.length
@@ -860,7 +896,7 @@ export default {
               this.api_busy = false
               console.log('Block retrieval error:', error.response)
             })
-            .finally(() =>{
+            .finally(() => {
               if (block_list.length === this.block_list_api_import.length + this.block_table_error_count) {
                 this.block_table = this.block_list_api_import
                 this.block_table_busy = false
@@ -885,6 +921,7 @@ export default {
 
     transaction_list_axios_importer: function (transaction_list) {
       this.api_busy = true
+      this.transaction_list_api_import = []
       this.transaction_table_busy = true
       let transaction_list_base_url = `${this.$root.api_combined_address}/transaction`
       this.transaction_table_import_max = transaction_list.length
@@ -901,7 +938,7 @@ export default {
               this.makeToast('danger', 'Transaction Retrieval Failure', error, false)
               console.log(error)
             })
-            .finally(() =>{
+            .finally(() => {
               if (transaction_list.length === this.transaction_list_api_import.length + this.transaction_table_error_count) {
                 this.transaction_table = this.transaction_list_api_import
                 this.transaction_table_busy = false
@@ -927,6 +964,8 @@ export default {
       if (this.currency_chosen_value === 'XBP') {
         if ((input / 100000000).toFixed(2) > 0) {
           return '₿' + ((input / 100000000).toFixed(toFixed)).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        } else if (input === 0) {
+          return '₿' + input
         } else {
           return '₿' + ((input / 100000000).toFixed(6)).toLocaleString('en-GB')
         }
@@ -947,6 +986,8 @@ export default {
 
         if (currency_value.toFixed(toFixed) > 0) {
           fixed_value = currency_value.toFixed(toFixed)
+        } else if (currency_value === 0) {
+          fixed_value = 0
         } else {
           fixed_value = currency_value.toFixed(6)
         }
@@ -962,7 +1003,7 @@ export default {
       }
     },
 
-    date_formatter: function (date){
+    date_formatter: function (date) {
       return new Date(date).toLocaleDateString()
     },
 
