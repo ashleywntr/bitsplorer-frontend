@@ -20,6 +20,9 @@
             <b-navbar-nav class="ml-auto">
               <b-nav-form>
               <b-input-group>
+                <b-input-group-prepend>
+                  <b-input-group-text>{{this.$root.api_address}}</b-input-group-text>
+                </b-input-group-prepend>
 <!--                <b-form-select v-model="currency_chosen_value"-->
 <!--                               :disabled="api_busy"-->
 <!--                               :options="currency_options"-->

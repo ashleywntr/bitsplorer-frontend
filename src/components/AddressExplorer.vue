@@ -1,6 +1,7 @@
 <template>
-  <b-container class="pb-3">
-    <b-row class="pt-3">
+  <div>
+  <b-container class="p-3 mb-3">
+    <b-row class="">
       <b-col>
         <h1>
           <strong>Address Explorer</strong>
@@ -20,7 +21,7 @@
       </b-col>
     </b-row>
 
-    <b-row class="mt-3 pb-3">
+    <b-row class="mt-3 mb-3">
       <b-col>
         <b-input-group prepend="Address Hash" size="lg">
           <b-form-input id="address-form-input"
@@ -39,29 +40,27 @@
       </b-col>
     </b-row>
 
-    <b-row class="mb-4" v-if="this.$cookies.get('previous_address_searches')">
+    <b-row class="" v-if="this.$cookies.get('previous_address_searches')">
       <b-col>
         <b-input-group prepend="Previous Searches" size="lg">
           <b-form-select v-model="previous_address_search_selection"
                          :disabled="api_busy"
                          :options="previous_address_search_selection_options">
+
           </b-form-select>
         </b-input-group>
       </b-col>
     </b-row>
+  </b-container>
 
-    <b-row v-if="address_table_array" class="mt-5">
-      <b-col v-for="entry in address_table_array" :key="entry._id">
-        <b-card :key="entry._id" :id="entry._id">
-
-          <template #header class="">
-            <b-row>
-              <b-col class="d-flex">
-                  <h4>{{ entry._id }}</h4>
-                  <b-button @click="address_remover(entry._id)" variant="outline-danger" class="ml-auto"><strong>X</strong></b-button>
-              </b-col>
-            </b-row>
-          </template>
+  <b-container v-if="address_table_array.length > 0" class="p-3 mb-3">
+    <b-row style="max-height: available; overflow-y: scroll">
+      <b-col>
+        <b-card v-for="entry in address_table_array" :key="entry._id" :id="entry._id" >
+          <b-card-header class="d-flex">
+            <h4>{{ entry._id }}</h4>
+            <b-button @click="address_remover(entry._id)" variant="outline-danger" class="ml-auto"><strong>X</strong></b-button>
+          </b-card-header>
 
           <b-card-body>
             <b-row v-if="entry.abuse_count">
@@ -128,12 +127,11 @@
 
                   <template #row-details="row">
                     <b-card>
-                      <b-row>
-                        <b-col>
+                      <b-card-header>
                           <h3>Transaction Details</h3>
-                          {{console.log('Whole row', row)}}
-                        </b-col>
-                      </b-row>
+                          <h4 class="danger">{{transaction_type_checker(entry._id, row)}}</h4>
+                      </b-card-header>
+                      <b-card-body style="max-height: 20vh;overflow-y: scroll;">
                       <b-row>
                         <b-col>
                           <h3 v-if="!row.item.coinbase_transaction">Inputs</h3>
@@ -174,22 +172,23 @@
                               <b-tr v-for="output in row.item.out" :key="output.addr">
                                 <b-td stacked-heading="Value" v-text="currency_formatter(output.value)"></b-td>
                                 <b-td stacked-heading="Address">
-                                  <a :href="'#'+output.addr" @click="address_populator(output.addr)">{{
-                                      output.addr
-                                    }}</a></b-td>
-                                <b-td stacked-heading="Spent">{{ output.spent }}</b-td>
+                                  <a v-if="output.addr !== entry._id" :href="'#'+output.addr" @click="address_populator(output.addr)">{{output.addr }}</a>
+                                  <u v-else>{{output.addr}}</u>
+                                </b-td>
+                                <b-td v-if="output.spent" variant="danger" class="text-center">Spent</b-td>
+                                <b-td v-else variant="success" class="text-center">Not Spent</b-td>
                                 <b-td stacked-heading="Output Order">{{ output.n }}</b-td>
                               </b-tr>
                             </b-tbody>
                           </b-table-simple>
                         </b-col>
                       </b-row>
-
-                      <b-row>
-                        <b-col>
-                          <span>Transaction Hash {{ row.item._id }}</span>
-                        </b-col>
-                      </b-row>
+                      </b-card-body>
+                      <b-card-footer>
+                        <span>{{ new Date(row.item.time * 1000).toUTCString() }}</span>
+                        <br>
+                        <span>Transaction Hash: {{ row.item.id }}</span>
+                      </b-card-footer>
                     </b-card>
                   </template>
                 </b-table>
@@ -199,8 +198,8 @@
         </b-card>
       </b-col>
     </b-row>
-
   </b-container>
+  </div>
 </template>
 
 <script>
@@ -272,15 +271,6 @@ export default {
       transaction_table_sort_by: 'time',
       transaction_table_fields: [
         {
-          key: "coinbase_transaction", label: "", sortable: true, formatter: value => {
-            if (value === true) {
-              return "Coinbase Transaction"
-            } else {
-              return ""
-            }
-          }
-        },
-        {
           key: "time", label: "Date", sortable: true, formatter: (value) => {
             return new Date(value * 1000).toLocaleDateString('en-GB')
           }
@@ -337,7 +327,6 @@ export default {
             return_object = response.data
             this.api_busy = false
             console.log("Extra Address Data Retrieval Complete")
-            console.log(return_object)
             this.address_table_array.push(return_object)
           })
           .catch(error => {
@@ -355,7 +344,6 @@ export default {
           .then(response => {
             let working_index = 0
             return_list = response.data['txs']
-            console.log(return_list)
             this.address_table_array.forEach((entry, i) => {
               if (entry._id === address) {
                 working_index = i
@@ -364,8 +352,6 @@ export default {
             let target = this.address_table_array[working_index]
             target.transaction_data = return_list
             this.$set(this.address_table_array, working_index, target)
-            console.log('Working Index', working_index)
-            console.log('Extra data', this.address_table_array)
           })
           .catch(error => {
             this.makeToast('danger', 'Address Transaction Import Error', error)
@@ -388,7 +374,7 @@ export default {
         this.address_importer(address)
       }
       } else{
-        this.makeToast('info', 'Invalid Input', 'Please input address to be imported.')
+        this.makeToast('info', 'Invalid Input', 'Please input address for import.')
       }
     },
     transaction_populator: function (address) {
@@ -404,12 +390,10 @@ export default {
     },
 
     address_main_search_history_cookie(address) {
-      console.log('History cookie called')
       let previous_address_searches = []
       let current_time = new Date()
 
       if (this.$cookies.get('previous_address_searches')) {
-        console.log('Address Explorer retrieving searches from cookie')
         previous_address_searches = JSON.parse(this.$cookies.get('previous_address_searches'))
       }
       previous_address_searches.push({
@@ -447,14 +431,37 @@ export default {
             })
       }
     },
+    transaction_type_checker: function(address_hash, transaction_info){
+      let address_in_inputs = false
+      let address_in_outputs = false
+
+      transaction_info.item.inputs.forEach((input) =>{
+        if(address_hash === input.prev_out.addr){
+          address_in_inputs = true
+        }
+      })
+      transaction_info.item.out.forEach((output) =>{
+        if(address_hash === output.addr){
+          address_in_outputs = true
+        }
+      })
+
+      if(address_in_inputs && address_in_outputs){
+        return("Sender & Recipient")
+      }else if(address_in_inputs && !address_in_outputs){
+        return ("Sender Only")
+      } else if (!address_in_inputs && address_in_outputs){
+        return("Recipient Only")
+      }
+
+      return("check failed")
+    },
 
     currency_value_retriever: function () {
-      console.log(date_string)
       let currency_retrieval_url = `${this.$root.api_combined_address}/currency?date_from=${date_string}&date_to=${date_string}`
       console.log('Currency Retrieval', currency_retrieval_url)
       axios.get(currency_retrieval_url)
           .then(results => {
-            console.log(results)
             this.currency_data = results.data
           })
           .catch(error => {
@@ -466,7 +473,10 @@ export default {
       if (this.currency_chosen_value === 'XBP') {
         if ((input / 100000000).toFixed(2) > 0) {
           return '₿' + ((input / 100000000).toFixed(toFixed)).toLocaleString('en-GB')
-        } else {
+        } else if(input === 0){
+          return '₿' + input
+        }
+        else {
           return '₿' + ((input / 100000000).toFixed(6)).toLocaleString('en-GB')
         }
       } else {
@@ -478,7 +488,10 @@ export default {
 
         if (currency_value.toFixed(toFixed) > 0) {
           fixed_value = currency_value.toFixed(toFixed)
-        } else {
+        } else if (currency_value === 0){
+          fixed_value = 0
+        }
+        else {
           fixed_value = currency_value.toFixed(6)
         }
         if (this.currency_chosen_value === 'USD') {
