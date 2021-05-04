@@ -26,14 +26,14 @@
         <b-input-group prepend="Address Hash" size="lg">
           <b-form-input id="address-form-input"
                         v-model="address_entry"
-                        placeholder="33i1YrAZ6y6xfkK819zd7CXup4NMXAPB1C"
+                        placeholder="Address Hash (26-35 Chars)"
                         type="search"
                         trim>
           </b-form-input>
           <b-input-group-append>
             <b-button :disabled="api_busy" class="btn" variant="primary" @click="address_populator(address_entry)">
-              <b-spinner v-if="api_busy" small></b-spinner>
-              <b-icon-search></b-icon-search>
+              <b-spinner v-if="api_busy" type="grow" small></b-spinner>
+              <b-icon-search v-else></b-icon-search>
             </b-button>
           </b-input-group-append>
         </b-input-group>
@@ -316,6 +316,7 @@ export default {
       })
     },
     address_importer: function (address) {
+      this.api_busy=true
       this.address_main_search_history_cookie(address)
       let url = `${this.$root.api_combined_address}/address?hash=${address}`
       console.log("Retrieving Extra Address Data from", url)
@@ -333,9 +334,12 @@ export default {
             this.makeToast('danger', 'Address Import Error', error)
             console.log(error)
           })
-
+          .finally(()=>{
+            this.api_busy = false
+          })
     },
     transaction_table_importer: function (address) {
+      this.api_busy = true
       let transaction_retrieval_url = `${this.$root.api_combined_address}/address/transactions?hash=${address}`
       let return_list = []
       console.log("Retrieving Extra Address Transaction Data from ", transaction_retrieval_url)
@@ -357,6 +361,9 @@ export default {
             this.makeToast('danger', 'Address Transaction Import Error', error)
             console.log(error)
           })
+          .finally(()=>{
+        this.api_busy = false
+      })
     },
 
     address_populator: function (address) {

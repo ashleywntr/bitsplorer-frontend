@@ -21,6 +21,11 @@ const routes = [
         component: () => import('../components/AddressExplorer.vue')
     },
     {
+        path:'/TransactionExplorer',
+        name: 'Transaction Explorer',
+        component: () => import('../components/TransactionExplorer')
+    },
+    {
         path: '/Settings',
         name: 'Settings',
         component: () => import('../components/Settings.vue')
