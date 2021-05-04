@@ -330,7 +330,8 @@
                           <b-tr v-for="output in row.item.out" :key="output.addr">
                             <b-td stacked-heading="Value" v-text="currency_formatter(output.value)"></b-td>
                             <b-td stacked-heading="Address">{{ output.addr }}</b-td>
-                            <b-td stacked-heading="Spent">{{ output.spent }}</b-td>
+                            <b-td v-if="output.spent" variant="danger" class="text-center">Spent</b-td>
+                            <b-td v-else variant="success" class="text-center">Not Spent</b-td>
                             <b-td stacked-heading="Output Order">{{ output.n }}</b-td>
                           </b-tr>
                         </b-tbody>

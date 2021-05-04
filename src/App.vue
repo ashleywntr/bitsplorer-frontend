@@ -13,8 +13,8 @@
               <b-nav-text><router-link class="nav-link" to="/" :class="{active: $route.name==='Home'}">Home</router-link></b-nav-text>
               <b-nav-text><router-link class="nav-link" to="/AddressExplorer" :class="{active: $route.name==='Address Explorer'}">Address Explorer</router-link></b-nav-text>
               <b-nav-text><router-link class="nav-link" to="/BlockExplorer" :class="{active: $route.name==='Block Explorer'}">Block Explorer</router-link></b-nav-text>
-<!--              <b-nav-text><router-link class="nav-link" to="/SavedSearches">Saved Searches</router-link></b-nav-text>-->
-              <b-nav-text><router-link class="nav-link" to="/Settings" :class="{active: $route.name==='Settings'}" >Settings</router-link></b-nav-text>
+<!--              <b-nav-text><router-link class="nav-link" to="TransactionExplorer" :class="{active: $route.name==='Transaction Explorer'}">Transaction Explorer</router-link></b-nav-text>-->
+              <!--              <b-nav-text><router-link class="nav-link" to="/SavedSearches">Saved Searches</router-link></b-nav-text>-->
             </b-navbar-nav>
 
             <b-navbar-nav class="ml-auto">
@@ -35,6 +35,7 @@
                 </b-input-group-append>
               </b-input-group>
               </b-nav-form>
+              <b-nav-text><router-link class="nav-link" to="/Settings" :class="{active: $route.name==='Settings'}"><b-icon-gear-fill></b-icon-gear-fill></router-link></b-nav-text>
             </b-navbar-nav>
 
           </b-collapse>
