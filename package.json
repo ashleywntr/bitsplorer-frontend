@@ -12,6 +12,8 @@
     "bootstrap-vue": "^2.18.1",
     "bottleneck": "^2.19.5",
     "core-js": "^3.6.5",
+    "d3": "^6.7.0",
+    "d3-force": "^2.1.1",
     "d3-hierarchy": "^2.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^3.2.3",

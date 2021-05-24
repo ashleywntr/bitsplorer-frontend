@@ -66,7 +66,7 @@
         <b-col xl="" class="">
           <b-input-group prepend="Visualisation" size="lg">
             <b-input-group-append is-text>
-              <b-form-checkbox switch class="ml-1" v-model="show_sunburst"></b-form-checkbox>
+              <b-form-checkbox switch class="ml-1" v-model="show_sunburst" :disabled="to_picker_date_disabled"></b-form-checkbox>
             </b-input-group-append>
             <b-form-input v-if="show_sunburst" id="range-2" size="lg" v-model="display_range" type="range" min="0"
                           max="0.01" step="0.00001"></b-form-input>
@@ -289,7 +289,7 @@
                   <h3>Transaction Details</h3>
                 </b-card-header>
 
-                <b-card-body style="max-height: 20vh;overflow-y: scroll;">
+                <b-card-body style="max-height: 30vh;overflow-y: scroll;">
                   <b-row>
                     <b-col>
                       <h3 v-if="!row.item.coinbase_transaction">Inputs</h3>
@@ -722,9 +722,9 @@ export default {
           this.total_value = mouse_over.value
           return description + ` ₿${(mouse_over.value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` // Regular Expression to comma separate long value strings
         } else if (mouse_over.depth === 1) {
-          description = `${mouse_over.data.name} Total: `
+          description = `${mouse_over.data.name}  Total: `
         } else if (mouse_over.depth === 2) {
-          description = `Block ${mouse_over.data.name} Total: `
+          description = `Block ${mouse_over.data.name}  Total: `
         }
         let btc_value_total = (this.total_value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
         description = description + ` ₿${(mouse_over.value / 100000000).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} / ₿${btc_value_total}`
