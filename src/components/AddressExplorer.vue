@@ -2,11 +2,7 @@
   <div>
     <b-container class="p-3 mb-3">
       <b-row class="">
-        <b-col>
-          <h1>
-            <strong>Address Explorer</strong>
-          </h1>
-        </b-col>
+        <b-col><h1><strong>Address Explorer</strong></h1></b-col>
       </b-row>
 
       <b-row class="mb-4">
@@ -14,8 +10,7 @@
           <b-input-group prepend="Currency" size="lg">
             <b-form-select v-model="currency_chosen_value"
                            :disabled="api_busy"
-                           :options="currency_options"
-            >
+                           :options="currency_options">
             </b-form-select>
           </b-input-group>
         </b-col>
@@ -26,14 +21,14 @@
           <b-input-group prepend="Address Hash" size="lg">
             <b-form-input id="address-form-input"
                           v-model="address_entry"
-                          placeholder="Address Hash (26-35 Chars)"
+                          placeholder="Address Hash"
                           type="search"
                           trim>
             </b-form-input>
             <b-input-group-append>
               <b-button :disabled="api_busy" class="btn" variant="primary" @click="address_populator(address_entry)">
                 <b-spinner v-if="api_busy" type="grow" small></b-spinner>
-                <b-icon-search v-else></b-icon-search>
+                <b-icon-search v-else/>
               </b-button>
             </b-input-group-append>
           </b-input-group>
@@ -53,7 +48,7 @@
       </b-row>
     </b-container>
 
-    <b-container v-if="address_table_array.length > 0" class="p-3 mb-3">
+    <b-container v-if="!(address_table_array.length === 0)" class="p-3 mb-3">
       <b-row style="max-height: available; overflow-y: scroll">
         <b-col>
           <b-card v-for="entry in address_table_array" :key="entry._id" :id="entry._id">
@@ -85,9 +80,24 @@
                 </b-col>
               </b-row>
 
+              <b-row v-if="!(entry.native_abuse_data.length === 0)">
+                <b-col>
+                  <b-alert dismissible :show="true" variant="warning">BITSPLORER: Malicious Activity Flagged in Bitsplorer database. <a @click="entry.show_native_abuse_data = !entry.show_native_abuse_data"><u>{{entry.show_native_abuse_data ? 'Hide' : 'Show'}}</u></a>
+                  </b-alert>
+                </b-col>
+              </b-row>
+
               <b-row v-if="!entry.abuse_check">
                 <b-col>
                   <b-alert dismissable :show="true" variant="warning">Failed to retrieve abuse report</b-alert>
+                </b-col>
+              </b-row>
+
+              <b-row v-if="entry.show_native_abuse_data">
+                <b-col>
+                  <b-table :fields="abuse_table_fields"
+                            :items="entry.native_abuse_data">
+                  </b-table>
                 </b-col>
               </b-row>
 
@@ -208,19 +218,39 @@
                 </b-col>
               </b-row>
             </b-card-body>
+            <b-card-footer>
+              <b-button v-if="!entry.toggleAbuseForm" @click="entry.toggleAbuseForm = true">File Report</b-button>
+              <div v-if="entry.toggleAbuseForm">
+              <div class="d-flex mb-2">
+                <h3>File Address Report</h3>
+                <b-button class="ml-auto" variant="outline-danger" @click="entry.toggleAbuseForm = false">X</b-button>
+              </div>
+              <span>
+                <b-form @submit.stop.prevent="abuse_submit" reset="" v-if="true">
+                  <b-input-group prepend="Address" class="mb-2"><b-form-input id="abuse_address" name="address" :value="entry._id" :disabled="true"/></b-input-group>
+                  <b-input-group prepend="Source" class="mb-2"><b-form-input id="abuse_source" name="source"/></b-input-group>
+                  <b-input-group prepend="Date" class="mb-2"><b-form-datepicker id="abuse_date" name="date" :max="max_date" v-model="report_picker"/></b-input-group>
+                  <b-input-group prepend="Notes" class="mb-2"><b-form-textarea id="abuse_notes" name="notes"/></b-input-group>
+
+                  <b-button type="submit" variant="primary" class="mr-2">Submit</b-button>
+                  <b-button type="reset" variant="danger">Reset</b-button>
+                </b-form>
+              </span>
+              </div>
+            </b-card-footer>
           </b-card>
         </b-col>
       </b-row>
     </b-container>
 
-    <b-container class="p-3 mb-3">
+    <b-container class="p-3 mb-3" v-if="!(address_table_array.length === 0)">
       <b-row>
         <b-col class="d-flex">
-          <h1><strong>Visualiser (DEV)</strong></h1>
-          <b-button @click="initialise_graph" class="ml-auto" :disabled="address_table_array.length < 0" variant="outline-secondary">Initialise Graph</b-button>
+          <h1><strong>Visualiser</strong></h1>
+          <b-button @click="initialise_graph" class="ml-auto" variant="outline-secondary"><b-icon-arrow-clockwise/></b-button>
         </b-col>
       </b-row>
-      <b-row>
+      <b-row class="border-success">
         <b-col>
           <div ref="vis"/>
         </b-col>
@@ -234,7 +264,11 @@
 import axios from "axios"
 import * as d3 from "d3"
 import "d3-force"
+import "d3-drag"
 
+const now = new Date
+const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+const max_date = new Date(today)
 
 const USD_formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -264,6 +298,8 @@ export default {
   name: "AddressExplorer",
   data() {
     return {
+      max_date: max_date,
+      report_picker: max_date,
       address_entry: null,
       address_table_fields: [
         {key: 'n_tx', label: 'Total TXs'},
@@ -283,6 +319,13 @@ export default {
           formatter: (value, key, item) => this.currency_formatter(value, key, item)
         },
       ],
+
+      abuse_table_fields: [
+        {key: 'date', label: 'Report Date'},
+        {key: 'source', label: 'Report Source' },
+        {key: 'notes', label: 'Report Notes'}
+      ],
+
       api_busy: false,
       address_table_array: [],
 
@@ -360,6 +403,8 @@ export default {
           .then(response => {
             console.log('Address Response Received')
             return_object = response.data
+            return_object.toggleAbuseForm = false
+            return_object.show_native_abuse_data = false
             this.api_busy = false
             console.log("Extra Address Data Retrieval Complete")
             this.address_table_array.push(return_object)
@@ -460,7 +505,6 @@ export default {
         }
 
         if (!in_list && previous_address_searches[x]) {
-          console.log(previous_address_searches[x])
           filtered_searches.push(previous_address_searches[x])
         }
       }
@@ -509,7 +553,7 @@ export default {
       const width = this.$refs.vis.clientWidth
       const height = 500
 
-      const range = Math.sqrt(width)
+      const range = width / 16
       let domain = 0
 
       this.address_table_array.forEach((item) => {
@@ -517,11 +561,9 @@ export default {
           domain = item.total_received
         }
       })
-      console.log(range)
-      console.log(domain)
       let circle_scale = d3.scaleSqrt()
         .domain([0, domain])
-        .range([0, range])
+        .range([15, range])
 
       const addr_vis = d3.select(this.$refs.vis)
           .append("svg")
@@ -536,17 +578,43 @@ export default {
           .selectAll("circle")
           .data(this.address_table_array)
           .enter().append('circle')
-          .attr('r', node => circle_scale( node.total_received))
-          .attr('fill', '#dd4a68')
+          .attr('r', node => circle_scale(node.total_received))
+          .attr('fill', node =>  {
+            if (!(node.abuse_count === 0)){
+              return '#ff0000'
+            }
+            else return '#9301a2'
+          })
 
       const text_elements = addr_vis.append('g')
           .selectAll('text')
           .data(this.address_table_array)
           .enter().append('text')
           .text(node => node._id)
-          .attr('font-size', 15)
-          .attr('dx', 15)
-          .attr('dy', 4)
+          .style('font-size', 15)
+          .style("text-anchor", "middle")
+          .attr('dy', node => {
+            return -circle_scale(node.total_received) -15
+          })
+
+      const dragDrop = d3.drag()
+      .on('start', node => {
+        console.log("Drag Start")
+        node.fx = node.x
+        node.fy = node.y
+      })
+      .on('drag', (event, node) => {
+        console.log("Drag Drag")
+        simulation.alphaTarget(0.7).restart()
+        node.fx = event.x
+        node.fy = event.y
+      })
+      .on('end', (event, node) => {
+        simulation.alphaTarget(0)
+        node.fx=null
+        node.fy=null
+      })
+      node_elements.call(dragDrop)
 
       simulation.nodes(this.address_table_array).on('tick', () => {
         node_elements
@@ -604,6 +672,23 @@ export default {
         }
       }
     },
+    abuse_submit: function (form){
+      let post_form = new FormData()
+      let post_url = `${this.$root.api_combined_address}/post/flagging/address`
+      form.target.forEach((x) => {
+        if(x.name) {
+          post_form.append(x.name, x.value)
+        }
+      })
+      axios.post(post_url, post_form)
+      .then(results=>{
+        this.makeToast('success', 'Address Report Submitted', 'Submission Successful')
+        console.log(results)
+      })
+      .catch(error=>{
+        this.makeToast('danger', 'Address Report Failure', error)
+      })
+    }
   },
   watch: {
     previous_address_search_selection: function (selection) {

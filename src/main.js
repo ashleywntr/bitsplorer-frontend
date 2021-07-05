@@ -24,7 +24,7 @@ Vue.prototype.$axios = axios
 Vue.config.productionTip = false
 Vue.$cookies.config('7d')
 
-let api_address = 'py-chain.ddns.net'
+let api_address = 'bitsplorer.ddns.net'
 let api_port = '55397'
 
 let brand_text = "Bitsplorer"
