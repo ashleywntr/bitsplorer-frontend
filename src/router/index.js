@@ -26,6 +26,11 @@ const routes = [
         component: () => import('../components/TransactionExplorer')
     },
     {
+        path: '/FlaggedAddresses',
+        name: 'Flagged Addresses',
+        component: () => import('../components/FlaggedAddresses.vue')
+    },
+    {
         path: '/Settings',
         name: 'Settings',
         component: () => import('../components/Settings.vue')

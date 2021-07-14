@@ -11,7 +11,10 @@
           <b-collapse id="nav-text-collapse" is-nav>
             <b-navbar-nav>
               <b-nav-text><router-link class="nav-link" to="/" :class="{active: $route.name==='Home'}">Home</router-link></b-nav-text>
-              <b-nav-text><router-link class="nav-link" to="/AddressExplorer" :class="{active: $route.name==='Address Explorer'}">Address Explorer</router-link></b-nav-text>
+              <b-nav-item-dropdown text="Address Explorer" class="nav-link" :class="{active: ($route.name==='Address Explorer' | $route.name==='Flagged Addresses')}">
+                <b-dropdown-item to="/AddressExplorer" >Address Explorer</b-dropdown-item>
+                <b-dropdown-item to="/FlaggedAddresses">Flagged Addresses</b-dropdown-item>
+              </b-nav-item-dropdown>
               <b-nav-text><router-link class="nav-link" to="/BlockExplorer" :class="{active: $route.name==='Block Explorer'}">Block Explorer</router-link></b-nav-text>
 <!--              <b-nav-text><router-link class="nav-link" to="TransactionExplorer" :class="{active: $route.name==='Transaction Explorer'}">Transaction Explorer</router-link></b-nav-text>-->
               <!--              <b-nav-text><router-link class="nav-link" to="/SavedSearches">Saved Searches</router-link></b-nav-text>-->
@@ -49,10 +52,8 @@
       <footer>
         <div class="social"><img alt="bitcoin logo public domain" class="img-fluid"
                                  src="./assets/img/Bitcoin_logo.svg" style="width: 196px;"></div>
-<!--        <ul class="list-inline">-->
-<!--          <li class="list-inline-item"><router-link to="/">Home</router-link></li>-->
-<!--        </ul>-->
-        <div class="copyright">Bitsplorer 2021</div>
+        <div class="copyright"><b-icon-bootstrap/>{{this.$root.title_brand}} 2021</div>
+        <div class="copyright">Blockchain Data Powered by <a href="https://www.blockchain.com/explorer">Blockchain.com</a></div>
         <div class="copyright">Historical Price Data Powered by <a href="https://www.coindesk.com/price/bitcoin">CoinDesk</a></div>
       </footer>
     </div>
