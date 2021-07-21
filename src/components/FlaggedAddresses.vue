@@ -12,12 +12,18 @@
                  :sort-by.sync="abuse_table_sort_by"
                  bordered
                  :hover="!api_busy"
-                 select-mode="single"
-                 :selectable="!api_busy"
-                 selected-variant="primary">
+                 selected-variant="primary"
+                 >
 
           <template #cell(erase_entry)="row">
             <b-button variant="outline-danger" @click="abuse_remove(row.item)"><b-icon-trash/></b-button>
+          </template>
+
+          <template #cell(address)="address_cell">
+            <p style="word-break: break-all">{{address_cell.value}}</p>
+          </template>
+          <template #cell(source)="source">
+            <p style="word-break: break-all">{{source.value}}</p>
           </template>
 
         </b-table>
