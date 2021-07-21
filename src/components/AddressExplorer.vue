@@ -48,12 +48,12 @@
       </b-row>
     </b-container>
 
-    <b-container v-if="!(address_table_array.length === 0)" class="p-3 mb-3">
+    <b-container v-if="!(address_table_array.length === 0)" class="p-3 mb-3 d-flex" >
       <b-row style="max-height: available; overflow-y: scroll">
         <b-col>
           <b-card v-for="entry in address_table_array" :key="entry._id" :id="entry._id">
             <b-card-header class="d-flex">
-              <h4>{{ entry._id }}</h4>
+              <h4 style="word-break: break-all">{{ entry._id }}</h4>
               <b-button @click="address_remover(entry._id)" variant="outline-danger" class="ml-auto"><strong>X</strong>
               </b-button>
             </b-card-header>
@@ -97,6 +97,10 @@
                 <b-col>
                   <b-table :fields="abuse_table_fields"
                             :items="entry.native_abuse_data">
+
+                    <template #cell(source)="source">
+                      <p style="word-break: break-all">{{source.value}}</p>
+                    </template>
                   </b-table>
                 </b-col>
               </b-row>
@@ -128,6 +132,7 @@
                   <b-pagination v-model="entry.current_page"
                                 :total-rows="entry.transaction_data.length"
                                 :per-page="transaction_table_per_page"
+                                align="fill"
                   ></b-pagination>
                   <b-table :fields="transaction_table_fields"
                            :items="entry.transaction_data"
@@ -137,8 +142,7 @@
                            :sort-desc="true"
                            :bordered="true"
                            class="pl-2 pr-2"
-                           :responsive="true"
-                           sticky-header="55vh">
+                           :responsive="true">
 
                     <template #cell(show_details)="row">
                       <b-button block class="mr-2" size="sm" @click="row.toggleDetails">
@@ -302,7 +306,9 @@ export default {
       report_picker: max_date,
       address_entry: null,
       address_table_fields: [
-        {key: 'n_tx', label: 'Total TXs'},
+        {key: 'n_tx', label: 'Total TXs', formatter: value =>{
+            return value.toLocaleString('en-GB')
+          }},
         {
           key: 'total_received',
           label: 'Total Received',
@@ -321,7 +327,7 @@ export default {
       ],
 
       abuse_table_fields: [
-        {key: 'date', label: 'Report Date'},
+        {key: 'date', label: 'Report Date', formatter: value => {return new Date(value).toLocaleDateString('en-GB')}},
         {key: 'source', label: 'Report Source' },
         {key: 'notes', label: 'Report Notes'}
       ],
@@ -445,6 +451,7 @@ export default {
             this.api_busy = false
           })
     },
+    transaction_table_partial_importer: function (contents){console.log(contents)},
 
     address_populator: function (address) {
       if (address) {
@@ -641,7 +648,7 @@ export default {
     currency_formatter: function (input, key, item, toFixed = 2) {
       if (this.currency_chosen_value === 'XBP') {
         if ((input / 100000000).toFixed(2) > 0) {
-          return '₿' + ((input / 100000000).toFixed(toFixed)).toLocaleString('en-GB')
+          return '₿' + ((input / 100000000).toFixed(toFixed)).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
         } else if (input === 0) {
           return '₿' + input
         } else {
