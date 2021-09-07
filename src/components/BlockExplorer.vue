@@ -289,7 +289,7 @@
                   <h3>Transaction Details</h3>
                 </b-card-header>
 
-                <b-card-body style="max-height: 30vh;overflow-y: scroll;">
+                <b-card-body >
                   <b-row>
                     <b-col>
                       <h3 v-if="!row.item.coinbase_transaction">Inputs</h3>
@@ -305,7 +305,7 @@
                             <b-th>Value</b-th>
                           </b-tr>
                         </b-thead>
-                        <b-tbody>
+                        <b-tbody style="max-height: 30vh;overflow-y: scroll;">
                           <b-tr v-for="input in row.item.inputs" :key="input.prev_out.addr">
                             <b-td stacked-heading="Value" v-text="currency_formatter(input.prev_out.value)"></b-td>
                             <b-td stacked-heading="Address">{{ input.prev_out.addr }}</b-td>
@@ -326,7 +326,7 @@
                             <b-th>Output Order</b-th>
                           </b-tr>
                         </b-thead>
-                        <b-tbody>
+                        <b-tbody style="max-height: 30vh;overflow-y: scroll;">
                           <b-tr v-for="output in row.item.out" :key="output.addr">
                             <b-td stacked-heading="Value" v-text="currency_formatter(output.value)"></b-td>
                             <b-td stacked-heading="Address">{{ output.addr }}</b-td>
@@ -635,6 +635,15 @@ export default {
           label: "Fee",
           sortable: true,
           formatter: (value, key, item) => this.currency_formatter(value, key, item, 6)
+        },
+        {
+          key: "change_adjusted_total",
+          label: "Total Val. Unique Outputs",
+          sortable: true,
+          formatter: (value, key, item) => {
+            if (value  > 0){return this.currency_formatter(value, key, item)}
+            else return('Unable to determine change.')
+          }
         },
         {
           key: "value_outputs",
