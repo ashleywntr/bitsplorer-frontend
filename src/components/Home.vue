@@ -1,4 +1,5 @@
 <template>
+  <div>
   <b-container>
     <b-row class="pt-3">
       <b-col>
@@ -31,15 +32,43 @@
     </b-row>
 
   </b-container>
+
+  <b-container>
+    <b-row class="pt-3">
+      <b-col>
+        <h1>Bitcoin News</h1>
+      </b-col>
+    </b-row>
+
+    <b-row style="max-height: 80vh;overflow-y: scroll;">
+      <b-col>
+      <b-card-group columns>
+        <div v-for="article in news" :key="article.url">
+        <b-card
+        :title="article.title"
+        :img-src="article.urlToImage"
+        style="max-width: 20rem"
+        :sub-title="article.author ? article.source.name+ ' - ' + article.author : article.source.name"
+        :footer="formatted_date(article.publishedAt)">
+          <b-card-text>{{article.description}}</b-card-text>
+        </b-card>
+        </div>
+      </b-card-group>
+      </b-col>
+    </b-row>
+  </b-container>
+  </div>
 </template>
 
 <script>
 import axios from "axios"
+
 export default {
 name: "Home",
   mounted(){
     document.title = this.$route.name + this.$root.title_brand
     this.price_checker()
+    this.news_retrieval()
   },
   methods:{
     price_checker: function (){
@@ -51,7 +80,6 @@ name: "Home",
       axios
           .get(url)
           .then(response => {
-            console.log(response.data)
             this.USD_Value = response.data.bpi.USD.rate
             this.GBP_Value = response.data.bpi.GBP.rate
             this.EUR_Value = response.data.bpi.EUR.rate
@@ -63,6 +91,23 @@ name: "Home",
             this.price_check_failed = true
             console.log(error)
           })
+    },
+    news_retrieval: function(){
+      let api_key = '84f2742a821a47bdb0f1fb5a32a82fb7'
+      let topic = 'bitcoin'
+      const now = new Date
+      const topic_date = now.toISOString().slice(0, 10)
+
+      let url =  `https://newsapi.org/v2/everything?q=${topic}&from=${topic_date}&sortBy=popularity&apiKey=${api_key}`
+      console.log('Retrieving latest news from',url)
+      axios.get(url)
+      .then(response =>{
+        console.log(response)
+        this.news = response.data.articles
+      })
+    },
+    formatted_date: function(format_string) {
+      return new Date(format_string).toLocaleString('en-GB')
     }
   },
   data(){
@@ -72,10 +117,11 @@ name: "Home",
       GBP_Value: 0.0,
       EUR_Value: 0.0,
       price_check_failed: false,
-      disclaimer: ""
+      disclaimer: "",
+
+      news: []
     }
   }
-
 }
 
 </script>

@@ -118,36 +118,41 @@
                 </b-col>
               </b-row>
 
-              <b-row v-if="!entry.transaction_data">
+              <b-row>
                 <b-col>
-                  <b-button class="btn btn-primary btn-block" :disabled="entry.txs.length > 500" @click="transaction_populator(entry._id)">
-                    <b-spinner v-if="api_busy" small></b-spinner>
-                    Load Additional Data
-                  </b-button>
-                </b-col>
-              </b-row>
-
-              <b-row v-if="entry.transaction_data" class="">
-                <b-col>
-                  <b-pagination v-model="entry.current_page"
-                                :total-rows="entry.transaction_data.length"
+                  <b-pagination v-if="entry.n_tx > transaction_table_per_page"
+                                v-model="entry.current_page"
+                                :total-rows="entry.n_tx"
                                 :per-page="transaction_table_per_page"
                                 align="fill"
+                                first-number
+                                last-number
                   ></b-pagination>
                   <b-table :fields="transaction_table_fields"
-                           :items="entry.transaction_data"
+                           :items="itemsProvider"
                            :per-page="transaction_table_per_page"
                            :current-page="entry.current_page"
-                           :sort-by.sync="transaction_table_sort_by"
-                           :sort-desc="true"
+                           :no-provider-filtering="true"
+                           :no-provider-sorting="true"
+                           :no-provider-paging="false"
                            :bordered="true"
                            class="pl-2 pr-2"
-                           :responsive="true">
+                           sticky-header="40vh"
+                           :responsive="true"
+                            :id="'table_'+entry._id"
+                            :api-url="entry._id">
 
                     <template #cell(show_details)="row">
                       <b-button block class="mr-2" size="sm" @click="row.toggleDetails">
                         {{ row.detailsShowing ? 'Hide' : 'Show' }} Details
                       </b-button>
+                    </template>
+
+                    <template #table-busy>
+                      <div class="text-center text-danger my-2">
+                        <b-spinner class="align-middle"></b-spinner>
+                        <strong>Loading...</strong>
+                      </div>
                     </template>
 
                     <template #row-details="row">
@@ -214,7 +219,7 @@
                         <b-card-footer>
                           <span>{{ new Date(row.item.time * 1000).toUTCString() }}</span>
                           <br>
-                          <span>Transaction Hash: {{ row.item.id }}</span>
+                          <span>Transaction Hash: {{ row.item._id }}</span>
                         </b-card-footer>
                       </b-card>
                     </template>
@@ -378,8 +383,7 @@ export default {
         {key: "show_details", label: ""}
       ],
       transaction_table_total_rows: 0,
-      transaction_table_per_page: 20,
-      transaction_table_current_page: 1,
+      transaction_table_per_page: 100,
     }
   },
   mounted() {
@@ -413,6 +417,8 @@ export default {
             return_object.show_native_abuse_data = false
             this.api_busy = false
             console.log("Extra Address Data Retrieval Complete")
+            return_object.current_page=0
+            return_object.transaction_page_data = []
             this.address_table_array.push(return_object)
           })
           .catch(error => {
@@ -451,7 +457,6 @@ export default {
             this.api_busy = false
           })
     },
-    transaction_table_partial_importer: function (contents){console.log(contents)},
 
     address_populator: function (address) {
       if (address) {
@@ -471,9 +476,23 @@ export default {
         this.makeToast('info', 'Invalid Input', 'Please input address for import.')
       }
     },
-    transaction_populator: function (address) {
-      console.log("Retrieving Tx for ", address)
-      this.transaction_table_importer(address)
+    itemsProvider: function (ctx) {
+      console.log(ctx)
+      let offset = 0 // if statement check to prevent negative offset
+      if (ctx.currentPage > 0){
+        offset = this.transaction_table_per_page * (ctx.currentPage - 1)
+      }
+      let url = `${this.$root.api_combined_address}/address/transactions?hash=${ctx.apiUrl}&offset=${offset}`
+      console.log("Retrieving Paginated Transaction Data from ", url)
+      return axios.get(url)
+            .then(response =>{
+              let data = response.data.txs
+              console.log("Transaction data for offset", offset, data)
+              return data || []
+            })
+            .catch(()=>{
+              return []
+            })
     },
     address_remover: function (address) {
       this.address_table_array.forEach((entry, index) => {
