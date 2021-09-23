@@ -51,6 +51,7 @@
         :sub-title="article.author ? article.source.name+ ' - ' + article.author : article.source.name"
         :footer="formatted_date(article.publishedAt)">
           <b-card-text>{{article.description}}</b-card-text>
+          <b-link :href="article.url" target="_blank">Full Text</b-link>
         </b-card>
         </div>
       </b-card-group>
@@ -93,12 +94,7 @@ name: "Home",
           })
     },
     news_retrieval: function(){
-      let api_key = '84f2742a821a47bdb0f1fb5a32a82fb7'
-      let topic = 'bitcoin'
-      const now = new Date
-      const topic_date = now.toISOString().slice(0, 10)
-
-      let url =  `https://newsapi.org/v2/everything?q=${topic}&from=${topic_date}&sortBy=popularity&apiKey=${api_key}`
+      let url =  `${this.$root.api_combined_address}/news`
       console.log('Retrieving latest news from',url)
       axios.get(url)
       .then(response =>{
