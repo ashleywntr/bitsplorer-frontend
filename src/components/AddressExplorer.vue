@@ -137,7 +137,7 @@
                            :no-provider-paging="false"
                            :bordered="true"
                            class="pl-2 pr-2"
-                           sticky-header="40vh"
+                           sticky-header="60vh"
                            :responsive="true"
                             :id="'table_'+entry._id"
                             :api-url="entry._id">
@@ -150,8 +150,7 @@
 
                     <template #table-busy>
                       <div class="text-center text-danger my-2">
-                        <b-spinner class="align-middle"></b-spinner>
-                        <strong>Loading...</strong>
+                        <b-progress variant="warning" animated max="1" value="1"></b-progress>
                       </div>
                     </template>
 
@@ -161,7 +160,7 @@
                           <h3>Transaction Details</h3>
                           <h4 class="danger">{{ transaction_type_checker(entry._id, row) }}</h4>
                         </b-card-header>
-                        <b-card-body style="max-height: 30vh;overflow-y: scroll;">
+                        <b-card-body>
                           <b-row>
                             <b-col>
                               <h3 v-if="!row.item.coinbase_transaction">Inputs</h3>
@@ -176,7 +175,7 @@
                                     <b-th>Value</b-th>
                                   </b-tr>
                                 </b-thead>
-                                <b-tbody>
+                                <b-tbody style="max-height: 30vh;overflow-y: scroll;">
                                   <b-tr v-for="input in row.item.inputs" :key="input.script">
                                     <b-td stacked-heading="Value"
                                           v-text="currency_formatter(input.prev_out.value)"></b-td>
@@ -199,7 +198,7 @@
                                     <b-th>Output Order</b-th>
                                   </b-tr>
                                 </b-thead>
-                                <b-tbody>
+                                <b-tbody style="max-height: 30vh;overflow-y: scroll;">
                                   <b-tr v-for="output in row.item.out" :key="output.script">
                                     <b-td stacked-heading="Value" v-text="currency_formatter(output.value)"></b-td>
                                     <b-td stacked-heading="Address">
@@ -307,6 +306,7 @@ export default {
   name: "AddressExplorer",
   data() {
     return {
+      address: null,
       max_date: max_date,
       report_picker: max_date,
       address_entry: null,
@@ -391,6 +391,11 @@ export default {
     this.currency_value_retriever()
     if (this.$cookies.get('previous_address_searches')) {
       this.address_main_search_history_cookie()
+    }
+    if (this.$route.params.auto_address){
+      let address = this.$route.params.auto_address
+      this.address_populator(address)
+      this.makeToast('info', 'Retrieving Flagged Address Details', `Retrieving info for address ${address}`)
     }
   },
   methods: {

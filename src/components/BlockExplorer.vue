@@ -289,7 +289,7 @@
                   <h3>Transaction Details</h3>
                 </b-card-header>
 
-                <b-card-body >
+                <b-card-body>
                   <b-row>
                     <b-col>
                       <h3 v-if="!row.item.coinbase_transaction">Inputs</h3>
@@ -342,7 +342,7 @@
                 <b-card-footer>
                     <span>{{ new Date(row.item.time * 1000).toUTCString() }}</span>
                     <br>
-                    <span>Transaction Hash: {{ row.item._id }}</span>
+                    <span>Transaction Hash: {{row.item._id}}</span>
                 </b-card-footer>
               </b-card>
             </template>

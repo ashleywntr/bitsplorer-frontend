@@ -20,7 +20,7 @@
           </template>
 
           <template #cell(address)="address_cell">
-            <p style="word-break: break-all">{{address_cell.value}}</p>
+            <p style="word-break: break-all"><router-link :to="{name: 'Address Explorer', params: {auto_address: address_cell.value}}"> {{address_cell.value}}</router-link></p>
           </template>
           <template #cell(source)="source">
             <p style="word-break: break-all">{{source.value}}</p>

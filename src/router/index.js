@@ -18,7 +18,7 @@ const routes = [
     {
         path: '/AddressExplorer',
         name: 'Address Explorer',
-        component: () => import('../components/AddressExplorer.vue')
+        component: () => import('../components/AddressExplorer.vue'),
     },
     {
         path:'/TransactionExplorer',
