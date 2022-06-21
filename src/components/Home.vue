@@ -33,7 +33,7 @@
 
   </b-container>
 
-  <b-container>
+  <b-container v-if="news.length">
     <b-row class="pt-3">
       <b-col>
         <h1>Bitcoin News</h1>
@@ -98,7 +98,6 @@ name: "Home",
       console.log('Retrieving latest news from',url)
       axios.get(url)
       .then(response =>{
-        console.log(response)
         this.news = response.data.articles
       })
     },

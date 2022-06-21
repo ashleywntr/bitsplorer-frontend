@@ -298,7 +298,7 @@ const CNY_formatter = new Intl.NumberFormat('en-GB', {
   currency: 'CNY'
 })
 let date = new Date()
-date.setDate(date.getDate() - 3)
+date.setDate(date.getDate() - 60)
 let date_string = date.toISOString().slice(0, 10)
 
 

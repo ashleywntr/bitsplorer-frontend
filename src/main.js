@@ -24,8 +24,9 @@ Vue.prototype.$axios = axios
 Vue.config.productionTip = false
 Vue.$cookies.config('7d')
 
-let api_address = 'bitsplorer.ddns.net'
-let api_port = '55397'
+let api_address = 'server.bitsplorer.org'
+let api_port = '443'
+let protocol = 'https'
 
 let brand_text = "Bitsplorer"
 let brand_stylised = "₿ITSPLOR£R"
@@ -34,7 +35,7 @@ let brand_cobmbined = `${" | "+brand_stylised}`
 new Vue({
     data: {
         app_state: 'v1',
-        api_combined_address: `http://${api_address}:${api_port}/api`,
+        api_combined_address: `${protocol}://${api_address}:${api_port}/api`,
         coindesk_root_url: "https://api.coindesk.com/v1/bpi",
         api_port: api_port,
         api_address: api_address,
