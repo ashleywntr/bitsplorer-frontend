@@ -5,11 +5,10 @@
       <b-col>
         <h1><strong>Home</strong></h1>
         <p>Welcome to {{this.$root.brand_text}}! The Bitcoin Blockchain explorer.</p>
+        <h2>About</h2>
+        <p>Bitsplorer was created to allow users to explore the Bitcoin blockchain. The system was shaped around the requirements of the client,  Dr Henry Hillman of the Faculty of Business and law at UWE Bristol. His previous research focussed on how Bitcoin could be used to facilitate money laundering, and he was seeking a purpose built tool to allow him to conduct analysis of the Bitcoin blockchain. The Bitsplorer application was created to address these aims, consisting of a frontend developed in Vue, with data supplied and processed by a Python Flask backend framework, using MongoDB for storage.
+        </p>
       </b-col>
-    </b-row>
-
-    <b-row>
-
     </b-row>
 
     <b-row v-if="disclaimer">

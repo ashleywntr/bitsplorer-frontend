@@ -52,9 +52,9 @@
       <footer>
         <div class="social"><img alt="bitcoin logo public domain" class="img-fluid"
                                  src="./assets/img/Bitcoin_logo.svg" style="width: 196px;"></div>
-        <div class="copyright"><b-icon-bootstrap/>{{this.$root.title_brand}} 2021</div>
+        <div class="copyright"><b-icon-bootstrap/>{{this.$root.title_brand}} 2020 - 2022</div>
         <div class="copyright">Blockchain Data Powered by <a href="https://www.blockchain.com/explorer">Blockchain.com</a></div>
-        <div class="copyright">Historical Price Data Powered by <a href="https://www.coindesk.com/price/bitcoin">CoinDesk</a></div>
+        <div class="copyright">Historical Price Data Powered by <a href="https://www.coindesk.com/price/bitcoin">CoinDesk</a>; <a href="https://freecurrencyapi.com/">FreeCurrencyAPI</a></div>
       </footer>
     </div>
   </div>

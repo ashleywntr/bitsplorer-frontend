@@ -5,7 +5,7 @@
         <b-col>
           <h1><strong>Block Explorer</strong></h1>
           <b-alert class="warning" :dismissible="true" :show="true">NOTE: Imports of non-cached data may be subject to
-            rate-limiting
+            rate-limiting. Current cache consists of 2022-01-01 to present.
           </b-alert>
         </b-col>
       </b-row>
