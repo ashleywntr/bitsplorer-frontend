@@ -83,11 +83,11 @@ export default {
           this.connection_status = 'API Offline'
         }
       })
-      .catch()
+      .catch( error =>
     {
+      console.log("API Check error", error)
       this.connection_status = 'API Offline'
-    }
-
+    })
   },
   methods: {
   },

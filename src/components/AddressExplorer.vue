@@ -665,7 +665,8 @@ export default {
             this.currency_data = results.data
           })
           .catch(error => {
-            console.log('Transaction Retrieval Error:', error)
+            console.log("Address currency retrieve error", error)
+            this.makeToast('danger', 'Address Currency Exchange Failure', error)
           })
     },
 
